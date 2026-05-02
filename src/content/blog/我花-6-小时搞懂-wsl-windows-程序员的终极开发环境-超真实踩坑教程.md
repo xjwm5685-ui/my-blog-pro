@@ -3,7 +3,7 @@ title: '我花 6 小时搞懂 WSL：Windows 程序员的终极开发环境（超
 description: '我花 6 小时搞懂 WSL：Windows 程序员的终极开发环境（超真实踩坑教程）'
 pubDate: 2026-01-29
 category: 'tech'
-tags: []
+tags: ['WSL', 'Windows', 'Linux', '开发环境', '教程']
 draft: false
 ---
 

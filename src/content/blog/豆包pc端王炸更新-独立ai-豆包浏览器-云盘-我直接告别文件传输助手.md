@@ -3,7 +3,7 @@ title: '豆包PC端王炸更新！独立AI+豆包浏览器+云盘，我直接告
 description: '豆包PC端王炸更新！独立AI+豆包浏览器+云盘，我直接告别文件传输助手'
 pubDate: 2026-03-02
 category: 'tech'
-tags: []
+tags: ['豆包', 'AI', '工具', '效率']
 draft: false
 ---
 

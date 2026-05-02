@@ -3,7 +3,7 @@ title: 'Python 断点调试总结'
 description: 'Python 断点调试总结'
 pubDate: 2025-11-17
 category: 'tech'
-tags: []
+tags: ['Python', '调试', '开发工具']
 draft: false
 ---
 

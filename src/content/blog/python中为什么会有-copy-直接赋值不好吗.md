@@ -3,7 +3,7 @@ title: 'Python中为什么会有.copy()？直接赋值不好吗？'
 description: 'Python中为什么会有.copy()？直接赋值不好吗？'
 pubDate: 2025-11-10
 category: 'tech'
-tags: []
+tags: ['Python', '编程基础', '数据类型']
 draft: false
 ---
 

@@ -3,7 +3,7 @@ title: '手把手教你安装 Hermes Agent 附白嫖小米MIMO大模型配置教
 description: '手把手教你安装 Hermes Agent 附白嫖小米MIMO大模型配置教程'
 pubDate: 2026-04-14
 category: 'tech'
-tags: []
+tags: ['Hermes', 'AI Agent', 'MIMO', '大模型', '教程']
 draft: false
 ---
 

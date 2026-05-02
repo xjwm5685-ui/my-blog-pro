@@ -3,7 +3,7 @@ title: '解决Pycharm每次新建项目都要重新安装第三方库的问题'
 description: '解决Pycharm每次新建项目都要重新安装第三方库的问题'
 pubDate: 2025-08-30
 category: 'tech'
-tags: []
+tags: ['PyCharm', 'Python', 'IDE', '开发工具']
 draft: false
 ---
 

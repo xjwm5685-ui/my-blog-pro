@@ -26,6 +26,7 @@ export const SITE_CONFIG = {
     { name: '笔记', path: '/category/notes' },
     { name: '游记', path: '/category/travel' },
     { name: '视频教程', path: '/videos' },
+    { name: '成品项目', path: '/projects' },
     { name: '标签', path: '/tags' },
     { name: '关于', path: '/about' }
   ]

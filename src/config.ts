@@ -3,7 +3,7 @@ export const SITE_CONFIG = {
   title: '吴煜凡的博客',
   description: '记录技术、学习和生活',
   author: '吴煜凡',
-  avatar: '/avatar.jpg',
+  avatar: '/images/python-断点调试总结-2.png',
   email: 'wyf1992570@163.com',
   github: 'https://github.com/WYHEF',
   bilibili: 'https://space.bilibili.com/631363348',

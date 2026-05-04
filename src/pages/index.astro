@@ -1,103 +1,708 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import PostCard from '@components/PostCard.astro';
+import LightBeam from '@components/LightBeam.astro';
+import Constellation from '@components/Constellation.astro';
+import CategoryCard from '@components/CategoryCard.astro';
+import Search from '@components/Search.astro';
 import { getAllPosts } from '@/utils/post';
 import { SITE_CONFIG } from '@/config';
 
 const posts = await getAllPosts();
-const recentPosts = posts.slice(0, SITE_CONFIG.postsPerPage);
+const recentPosts = posts.slice(0, 5);
+const featured = posts[0];
+
+const wordmark = SITE_CONFIG.wordmark;
+const letters = Array.from(wordmark);
 ---
 
 <BaseLayout title={SITE_CONFIG.title} description={SITE_CONFIG.description}>
-  <div class="container">
-    <section class="hero">
-      <h1 class="hero-title">欢迎阅读</h1>
-      <p class="hero-description">
-        这里记录了我的技术探索、学习笔记和旅行见闻。
-        <br>
-        请从左侧选择文章，或通过上方导航切换分类。
-      </p>
-    </section>
-    
-    <section class="posts">
-      <h2 class="section-title">最新更新</h2>
-      <div class="posts-list">
-        {recentPosts.map((post) => (
-          <PostCard post={post} />
-        ))}
+
+  <!-- ============================================================
+       HERO  —  3D parallax stage · wordmark · light beam · search
+       ============================================================ -->
+  <section class="hero" data-tilt-host>
+    <div class="hero__bg" aria-hidden="true">
+      <LightBeam side="right" />
+      <div class="hero__grid" aria-hidden="true"></div>
+    </div>
+
+    <div class="hero__stage" data-stage>
+      <div class="hero__top shell" data-z="20">
+        <span class="bracket-label">INTRODUCING</span>
+        {featured && (
+          <a href={`/blog/${featured.slug}`} class="hero__intro">
+            <span class="hero__intro-title">{featured.data.title}</span>
+            <span class="hero__intro-cta">READ <span class="arrow">↗</span></span>
+          </a>
+        )}
       </div>
-    </section>
-  </div>
+
+      <div class="hero__center shell">
+        <span class="hero__halo" aria-hidden="true" data-z="-60"></span>
+
+        <h1 class="wordmark" aria-label={wordmark} data-z="60">
+          {letters.map((ch, i) => (
+            <span class="wordmark__letter" style={`animation-delay: ${80 + i * 70}ms;`}>{ch}</span>
+          ))}
+        </h1>
+
+        <p class="hero__subtitle" data-z="40">
+          <span class="hero__subtitle-cn">{SITE_CONFIG.subtitle}</span>
+          <span class="hero__subtitle-divider" aria-hidden="true">·</span>
+          <span class="hero__subtitle-en">A field log of code, study & distance</span>
+        </p>
+
+        <div class="hero__search" data-z="60">
+          <Search variant="hero" placeholder="你想找什么？ · What do you want to read?" />
+        </div>
+      </div>
+
+      <div class="hero__bottom shell" data-z="20">
+        <span class="hero__scroll" aria-hidden="true">
+          <span class="hero__scroll-line"></span>
+          <span class="hero__scroll-cue">↓</span>
+          <span class="hero__scroll-text">SCROLL</span>
+        </span>
+        <span class="hero__coords" aria-hidden="true">
+          <span>LAT 28.6 · LNG 115.9</span>
+          <span class="hero__coords-sep"></span>
+          <span data-clock>00 : 00 : 00</span>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CATEGORIES
+       ============================================================ -->
+  <section class="block shell">
+    <header class="block__head">
+      <span class="bracket-label" data-reveal>CATEGORIES</span>
+      <h2 class="block__title" data-reveal style="--reveal-delay: 80ms">
+        记录技术 · 学习 · 远方<br/>
+        <span class="block__title-faint">A space for what I notice.</span>
+      </h2>
+    </header>
+
+    <div class="cards">
+      <CategoryCard
+        bracket="TECH"
+        title="技术"
+        tagline="Engineering field notes"
+        description={SITE_CONFIG.categories.tech.description}
+        icon="tech"
+        href="/category/tech"
+        index={0}
+      />
+      <CategoryCard
+        bracket="NOTES"
+        title="笔记"
+        tagline="Notes on what I learn"
+        description={SITE_CONFIG.categories.notes.description}
+        icon="notes"
+        href="/category/notes"
+        index={1}
+      />
+      <CategoryCard
+        bracket="TRAVEL"
+        title="游记"
+        tagline="Cities through a lens"
+        description={SITE_CONFIG.categories.travel.description}
+        icon="travel"
+        href="/category/travel"
+        index={2}
+      />
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CONSTELLATION INTERLUDE
+       ============================================================ -->
+  <Constellation
+    height="64vh"
+    density={92}
+    leftCaption="记录"
+    rightCaption="远方"
+  />
+
+  <!-- ============================================================
+       LATEST
+       ============================================================ -->
+  <section class="block shell">
+    <header class="block__head block__head--row">
+      <div>
+        <span class="bracket-label" data-reveal>LATEST</span>
+        <h2 class="block__title" data-reveal style="--reveal-delay: 80ms">最新文章</h2>
+      </div>
+      <a class="pill pill--ghost" href="/blog" data-reveal style="--reveal-delay: 160ms">
+        EXPLORE MORE <span class="arrow">↗</span>
+      </a>
+    </header>
+
+    <div class="rows">
+      {recentPosts.map((post, i) => (
+        <PostCard post={post} index={i} />
+      ))}
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ABOUT STRIP
+       ============================================================ -->
+  <section class="block shell about-strip">
+    <span class="bracket-label" data-reveal>WHO</span>
+
+    <div class="about-card" data-reveal data-tilt data-tilt-max="5" style="--reveal-delay: 100ms">
+      <div class="about-card__portrait">
+        <img src={SITE_CONFIG.avatar} alt={SITE_CONFIG.author} loading="lazy" />
+      </div>
+
+      <div class="about-card__copy">
+        <h3 class="about-card__name">
+          <span class="about-card__name-en">{SITE_CONFIG.authorEn}</span>
+          <span class="about-card__name-cn">{SITE_CONFIG.author}</span>
+        </h3>
+        <p class="about-card__bio">
+          热衷代码与构建工具的开发者；写技术、写学习、写每一次出走。
+          <br/>
+          A developer who loves systems, study notes & quiet cities.
+        </p>
+        <div class="about-card__ctas">
+          <a class="pill" href="/about">READ ABOUT <span class="arrow">↗</span></a>
+          <a class="pill pill--ghost" href={SITE_CONFIG.github} target="_blank" rel="noopener">GITHUB <span class="arrow">↗</span></a>
+          <a class="pill pill--ghost" href={SITE_CONFIG.bilibili} target="_blank" rel="noopener">BILIBILI <span class="arrow">↗</span></a>
+        </div>
+      </div>
+
+      <span class="about-card__corner about-card__corner--tl"></span>
+      <span class="about-card__corner about-card__corner--tr"></span>
+      <span class="about-card__corner about-card__corner--bl"></span>
+      <span class="about-card__corner about-card__corner--br"></span>
+    </div>
+  </section>
 </BaseLayout>
 
 <style>
+  /* ===================== HERO  ·  3D STAGE ===================== */
   .hero {
-    padding: var(--spacing-xl) 0;
-    margin-bottom: var(--spacing-xl);
-    border-bottom: 1px solid var(--color-border);
+    --rx: 0deg;
+    --ry: 0deg;
+    --px: 0;
+    --py: 0;
+    position: relative;
+    min-height: calc(100vh - var(--nav-h));
+    overflow: hidden;
+    isolation: isolate;
+    perspective: 1500px;
+    perspective-origin: 50% 45%;
   }
-  
-  .hero-title {
-    font-family: var(--font-heading);
-    font-size: 3.5rem; /* 更大的标题 */
-    font-weight: 500;
-    margin-bottom: var(--spacing-sm);
-    color: var(--color-text);
-    letter-spacing: -0.03em;
+
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
   }
-  
-  .hero-description {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    color: var(--color-text-secondary);
-    max-width: 600px;
-    font-style: italic; /* 更有格调 */
-    line-height: 1.4;
+
+  /* perspective floor grid — distant horizon */
+  .hero__grid {
+    position: absolute;
+    inset: 60% -20% -10% -20%;
+    background-image:
+      linear-gradient(rgba(190, 210, 255, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(190, 210, 255, 0.06) 1px, transparent 1px);
+    background-size: 80px 80px;
+    transform: perspective(800px) rotateX(72deg) translateZ(0);
+    transform-origin: center top;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, #000 0%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, #000 0%, transparent 75%);
+    opacity: 0.55;
+    animation: gridScroll 14s linear infinite;
   }
-  
-  .section-title {
+  @keyframes gridScroll {
+    from { background-position: 0 0,    0 0; }
+    to   { background-position: 0 80px, 80px 0; }
+  }
+
+  .hero__stage {
+    position: relative;
+    z-index: 2;
+    min-height: calc(100vh - var(--nav-h));
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    transform-style: preserve-3d;
+    transform:
+      translateZ(0)
+      rotateX(var(--rx))
+      rotateY(var(--ry));
+    transition: transform 320ms var(--ease-soft);
+    animation: stageEnter 1500ms var(--ease-out) both;
+  }
+  @keyframes stageEnter {
+    from {
+      opacity: 0;
+      transform:
+        translateZ(-220px)
+        rotateX(-7deg)
+        rotateY(0deg)
+        scale(1.04);
+    }
+    to {
+      opacity: 1;
+      transform: translateZ(0) rotateX(var(--rx)) rotateY(var(--ry)) scale(1);
+    }
+  }
+
+  .hero__stage > * {
+    transform-style: preserve-3d;
+  }
+
+  .hero__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--s-6);
+    padding-bottom: var(--s-4);
+    gap: 1rem;
+    flex-wrap: wrap;
+    transform: translateZ(20px);
+    animation: navFadeIn 800ms var(--ease-out) both;
+    animation-delay: 100ms;
+  }
+
+  .hero__intro {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.55rem 1.1rem 0.55rem 1.4rem;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    color: var(--text-soft);
+    transition: border-color var(--dur) var(--ease-soft), background var(--dur) var(--ease-soft);
+    max-width: 64ch;
+  }
+  .hero__intro:hover {
+    border-color: var(--border-strong);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+  }
+  .hero__intro-title {
+    font-family: var(--font-cn);
+    font-size: 0.86rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 50ch;
+  }
+  .hero__intro-cta {
     font-family: var(--font-mono);
-    font-size: 0.9rem;
-    margin-bottom: var(--spacing-lg);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-text-secondary);
+    font-size: 0.66rem;
+    letter-spacing: 0.22em;
+    color: var(--text);
+    flex-shrink: 0;
+    border-left: 1px solid var(--border-strong);
+    padding-left: 0.9rem;
   }
-  
-  .posts-list {
+  .hero__intro:hover .arrow { transform: translate(2px, -2px); }
+  .hero__intro .arrow { display: inline-block; transition: transform var(--dur) var(--ease-soft); }
+
+  .hero__center {
+    align-self: center;
+    text-align: left;
+    padding-block: var(--s-8);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s-6);
+    position: relative;
+    z-index: 5;
+    transform-style: preserve-3d;
+  }
+
+  /* glowing halo behind the wordmark, sits in the back plane */
+  .hero__halo {
+    position: absolute;
+    left: -8%;
+    top: 12%;
+    width: 90%;
+    height: 70%;
+    background:
+      radial-gradient(ellipse 60% 60% at 35% 50%,
+        rgba(190, 210, 255, 0.18) 0%,
+        rgba(120, 150, 220, 0.08) 30%,
+        transparent 65%);
+    filter: blur(40px);
+    transform: translateZ(-80px);
+    pointer-events: none;
+    animation: beamPulse 8s ease-in-out infinite;
+  }
+
+  /* WORDMARK — solid white type with a layered glow and light extrusion.
+     The 3D feel comes from the parent .hero__stage tilt, not from
+     transforming the text itself (which Chrome can't antialias through). */
+  .wordmark {
+    position: relative;
+    font-family: var(--font-display);
+    font-weight: 200;
+    font-size: clamp(5rem, 18vw, 17rem);
+    letter-spacing: -0.04em;
+    line-height: 0.92;
+    color: #ffffff;
+    margin: 0;
+    user-select: none;
+    white-space: nowrap;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: geometricPrecision;
+    text-shadow:
+      /* a tiny extrusion stack — fakes 3D pop without breaking AA */
+      1px 1px 0 rgba(180, 195, 230, 0.55),
+      2px 2px 0 rgba(140, 160, 210, 0.40),
+      3px 3px 0 rgba(100, 120, 180, 0.28),
+      4px 4px 0 rgba( 70,  85, 140, 0.20),
+      6px 6px 0 rgba( 40,  55, 100, 0.14),
+      /* glow halo */
+      0 0 32px rgba(190, 210, 255, 0.32),
+      0 0 80px rgba(190, 210, 255, 0.18),
+      0 0 160px rgba(255, 240, 220, 0.08);
+  }
+
+  .wordmark__letter {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(0.4em);
+    filter: blur(10px);
+    animation: letterRise 1100ms var(--ease-out) forwards;
+    will-change: opacity, transform, filter;
+  }
+
+  @keyframes letterRise {
+    0% {
+      opacity: 0;
+      transform: translateY(0.45em);
+      filter: blur(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+  }
+
+  .hero__subtitle {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.8rem;
+    color: var(--text-dim);
+    font-family: var(--font-cn);
+    font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+    max-width: 60ch;
+    opacity: 0;
+    animation: navFadeIn 900ms var(--ease-out) forwards;
+    animation-delay: 760ms;
+  }
+  .hero__subtitle-cn { color: var(--text-soft); letter-spacing: 0.02em; }
+  .hero__subtitle-divider { color: var(--text-faint); }
+  .hero__subtitle-en {
+    font-family: var(--font-display);
+    color: var(--text-muted);
+    font-size: 0.9em;
+  }
+
+  .hero__search {
+    width: 100%;
+    max-width: 580px;
+    opacity: 0;
+    animation: navFadeIn 900ms var(--ease-out) forwards;
+    animation-delay: 880ms;
+  }
+
+  .hero__bottom {
+    padding-bottom: var(--s-6);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    color: var(--text-muted);
+    transform: translateZ(20px);
+    opacity: 0;
+    animation: navFadeIn 900ms var(--ease-out) forwards;
+    animation-delay: 1000ms;
+  }
+
+  .hero__coords {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .hero__coords-sep {
+    width: 24px;
+    height: 1px;
+    background: var(--text-faint);
+  }
+
+  .hero__scroll {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-dim);
+  }
+  .hero__scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, transparent, var(--text-dim));
+  }
+  .hero__scroll-cue {
+    font-family: var(--font-mono);
+    animation: scrollCueBounce 2.4s ease-in-out infinite;
+  }
+  .hero__scroll-text {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+  }
+
+  /* ===================== BLOCK SHARED ===================== */
+  .block {
+    padding-block: var(--s-14) var(--s-10);
+    position: relative;
+  }
+
+  .block__head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-bottom: var(--s-8);
+  }
+  .block__head--row {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  .block__head--row > div { display: flex; flex-direction: column; gap: 0.85rem; }
+
+  .block__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.85rem, 3.2vw, 2.6rem);
+    font-weight: 300;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  .block__title-faint {
+    color: var(--text-muted);
+    font-style: italic;
+    font-weight: 300;
+    font-size: 0.7em;
+  }
+
+  /* ===================== CARDS GRID ===================== */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.4rem;
+  }
+  @media (max-width: 920px) {
+    .cards { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .cards { grid-template-columns: 1fr; }
+  }
+
+  /* ===================== ABOUT STRIP ===================== */
+  .about-strip { padding-bottom: var(--s-14); }
+
+  .about-card {
+    position: relative;
+    isolation: isolate;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 2rem;
+    padding: 2rem;
+    margin-top: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    transition: border-color var(--dur) var(--ease-soft);
+  }
+  .about-card:hover { border-color: var(--border-strong); }
+
+  .about-card__portrait {
+    width: 180px;
+    height: 180px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background: var(--bg-elev);
+  }
+  .about-card__portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(0.15) contrast(1.05);
+  }
+
+  .about-card__copy {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.85rem;
+  }
+
+  .about-card__name {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-weight: 300;
+    color: var(--text);
+  }
+  .about-card__name-en {
+    font-family: var(--font-display);
+    font-size: 1.85rem;
+    letter-spacing: -0.02em;
+  }
+  .about-card__name-cn {
+    font-family: var(--font-cn);
+    font-size: 1rem;
+    color: var(--text-dim);
+  }
+
+  .about-card__bio {
+    color: var(--text-dim);
+    font-family: var(--font-cn);
+    font-size: 0.94rem;
+    line-height: 1.65;
+    max-width: 60ch;
+  }
+
+  .about-card__ctas {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+  }
+
+  .about-card__corner {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 0 solid var(--text);
+    opacity: 0.3;
+    pointer-events: none;
+  }
+  .about-card__corner--tl { top: 6px; left: 6px;  border-top-width: 1px; border-left-width: 1px; }
+  .about-card__corner--tr { top: 6px; right: 6px;  border-top-width: 1px; border-right-width: 1px; }
+  .about-card__corner--bl { bottom: 6px; left: 6px;  border-bottom-width: 1px; border-left-width: 1px; }
+  .about-card__corner--br { bottom: 6px; right: 6px;  border-bottom-width: 1px; border-right-width: 1px; }
+
+  @media (max-width: 720px) {
+    .about-card { grid-template-columns: 1fr; }
+    .about-card__portrait { width: 140px; height: 140px; }
+  }
+
+  /* ===================== ROWS ===================== */
+  .rows {
     display: flex;
     flex-direction: column;
   }
-  
-  .view-all {
-    margin-top: var(--spacing-lg);
-  }
-  
-  .btn-link {
-    display: inline-block;
-    color: var(--color-text);
-    font-weight: 600;
-    text-decoration: none;
-    border-bottom: 2px solid transparent;
-    transition: border-color 0.2s ease;
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-  }
-  
-  .btn-link:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-  }
-  
-  @media (max-width: 768px) {
-    .hero-title {
-      font-size: 2.5rem;
+
+  /* ===================== HERO RESPONSIVE ===================== */
+  @media (max-width: 720px) {
+    .hero { perspective: none; }
+    .hero__stage { transform: none !important; animation: navFadeIn 700ms var(--ease-out) both; }
+    .hero__grid { display: none; }
+    .hero__top { padding-top: var(--s-4); }
+    .hero__intro { gap: 0.6rem; padding: 0.45rem 0.85rem; }
+    .hero__intro-cta { padding-left: 0.6rem; }
+    .hero__center { padding-block: var(--s-6); gap: var(--s-5); }
+    .wordmark {
+      font-size: clamp(4rem, 26vw, 7.5rem);
+      text-shadow:
+        1px 1px 0 rgba(180, 195, 230, 0.45),
+        2px 2px 0 rgba(120, 140, 195, 0.30),
+        0 0 24px rgba(190, 210, 255, 0.28);
     }
-    
-    .hero-description {
-      font-size: 1.25rem;
-    }
+    .hero__bottom { padding-bottom: var(--s-4); }
+    .hero__scroll-line { height: 24px; }
+    .hero__coords { display: none; }
   }
 </style>
 
+<script>
+  /* Hero — 3D parallax stage driven by cursor position */
+  function bootHero() {
+    const host  = document.querySelector<HTMLElement>('[data-tilt-host]');
+    const stage = host?.querySelector<HTMLElement>('[data-stage]');
+    if (!host || !stage) return;
+
+    let raf = 0;
+    let tx = 0, ty = 0, cx = 0, cy = 0;
+
+    const apply = () => {
+      cx += (tx - cx) * 0.08;
+      cy += (ty - cy) * 0.08;
+      const rx = (cy * -4).toFixed(2);  // pitch
+      const ry = (cx *  6).toFixed(2);  // yaw
+      host.style.setProperty('--rx', `${rx}deg`);
+      host.style.setProperty('--ry', `${ry}deg`);
+      host.style.setProperty('--px', cx.toFixed(3));
+      host.style.setProperty('--py', cy.toFixed(3));
+      // child-Z elements get a parallax slide on top of their translateZ
+      host.querySelectorAll<HTMLElement>('[data-z]').forEach((el) => {
+        const z = Number(el.dataset.z || '0');
+        const factor = z / 80;
+        el.style.transform =
+          `translate3d(${(cx * -10 * factor).toFixed(2)}px, ${(cy * -8 * factor).toFixed(2)}px, ${z}px)`;
+      });
+      if (Math.abs(tx - cx) + Math.abs(ty - cy) > 0.0008) {
+        raf = requestAnimationFrame(apply);
+      } else {
+        raf = 0;
+      }
+    };
+
+    const onMove = (e: MouseEvent) => {
+      const rect = host.getBoundingClientRect();
+      tx = ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+      ty = ((e.clientY - rect.top)  / rect.height) * 2 - 1;
+      if (!raf) raf = requestAnimationFrame(apply);
+    };
+    const onLeave = () => {
+      tx = 0; ty = 0;
+      if (!raf) raf = requestAnimationFrame(apply);
+    };
+
+    host.addEventListener('mousemove', onMove);
+    host.addEventListener('mouseleave', onLeave);
+
+    // tiny HUD clock
+    const clockEl = host.querySelector<HTMLElement>('[data-clock]');
+    if (clockEl) {
+      const tick = () => {
+        const d = new Date();
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        clockEl.textContent = `${pad(d.getHours())} : ${pad(d.getMinutes())} : ${pad(d.getSeconds())}`;
+      };
+      tick();
+      const id = window.setInterval(tick, 1000);
+      document.addEventListener('astro:before-swap', () => window.clearInterval(id), { once: true });
+    }
+  }
+  bootHero();
+  document.addEventListener('astro:page-load', bootHero);
+</script>

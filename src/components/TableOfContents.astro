@@ -1,115 +1,135 @@
 ---
-interface Heading {
-  depth: number;
-  text: string;
-  slug: string;
-}
+import type { MarkdownHeading } from 'astro';
 
 interface Props {
-  headings: Heading[];
+  headings: MarkdownHeading[];
 }
-
 const { headings } = Astro.props;
+
+// Only show h2 / h3 in the floating TOC for clarity
+const visible = headings.filter(h => h.depth >= 2 && h.depth <= 3);
 ---
 
-{headings.length > 0 && (
-  <nav class="toc">
-    <h3 class="toc-title">ON THIS PAGE</h3>
-    <ul class="toc-list">
-      {headings.map((heading) => (
-        <li class={`toc-item toc-level-${heading.depth}`}>
-          <a href={`#${heading.slug}`}>{heading.text}</a>
+{visible.length > 0 && (
+  <nav class="toc" aria-label="Table of contents">
+    <span class="bracket-label toc__label">ON THIS PAGE</span>
+    <ol class="toc__list">
+      {visible.map((h) => (
+        <li class:list={['toc__item', `toc__item--d${h.depth}`]}>
+          <a href={`#${h.slug}`} class="toc__link" data-heading={h.slug}>
+            <span class="toc__bullet" aria-hidden="true"></span>
+            <span class="toc__text">{h.text}</span>
+          </a>
         </li>
       ))}
-    </ul>
+    </ol>
   </nav>
 )}
 
 <style>
   .toc {
-    /* 移除背景色和边框，更极简 */
-    padding: var(--spacing-sm) 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    font-family: var(--font-cn);
   }
-  
-  .toc-title {
-    font-size: 0.75rem;
-    font-weight: 700;
-    margin-bottom: var(--spacing-md);
-    color: var(--color-text);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding-left: 0.75rem;
+
+  .toc__label {
+    font-size: 0.66rem;
+    letter-spacing: 0.32em;
   }
-  
-  .toc-list {
+
+  .toc__list {
     list-style: none;
     margin: 0;
     padding: 0;
-    border-left: 1px solid var(--color-border);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
   }
-  
-  .toc-item {
-    margin: 0;
+
+  .toc__item--d3 { padding-left: 1rem; }
+
+  .toc__link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.32rem 0.85rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    line-height: 1.4;
+    transition: color var(--dur-fast) var(--ease-soft);
   }
-  
-  .toc-item a {
-    display: block;
-    color: var(--color-text-secondary);
-    font-size: 0.85rem;
-    line-height: 1.6;
-    padding: 0.3rem 0.75rem;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    border-left: 2px solid transparent;
-    margin-left: -1px; /* Overlap border */
+
+  .toc__link::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--text);
+    transform: scaleY(0);
+    transition: transform var(--dur) var(--ease-soft);
+    transform-origin: center;
   }
-  
-  .toc-item a:hover {
-    color: var(--color-primary);
-    text-decoration: none;
+
+  .toc__bullet {
+    width: 4px;
+    height: 4px;
+    background: currentColor;
+    border-radius: 50%;
+    flex-shrink: 0;
+    opacity: 0.4;
+    transition: opacity var(--dur-fast) var(--ease-soft);
   }
-  
-  .toc-level-2 a {
-    padding-left: 0.75rem;
+
+  .toc__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
-  
-  .toc-level-3 a {
-    padding-left: 1.5rem;
+
+  .toc__link:hover { color: var(--text-soft); }
+  .toc__link:hover .toc__bullet { opacity: 0.9; }
+
+  .toc__link.is-active {
+    color: var(--text);
   }
-  
-  .toc-level-4 a {
-    padding-left: 2.25rem;
-  }
+  .toc__link.is-active::before { transform: scaleY(1); }
+  .toc__link.is-active .toc__bullet { opacity: 1; }
 </style>
 
 <script>
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        const id = entry.target.getAttribute('id');
-        const tocLink = document.querySelector(`.toc-list a[href="#${id}"]`);
-        
-        if (entry.isIntersecting) {
-          document.querySelectorAll('.toc-list a').forEach((link) => {
-            link.classList.remove('active');
-          });
-          tocLink?.classList.add('active');
-        }
-      });
-    },
-    { rootMargin: '-10% 0px -80% 0px' }
-  );
-  
-  document.querySelectorAll('article h2, article h3, article h4').forEach((heading) => {
-    observer.observe(heading);
-  });
-</script>
+  function bootTOC() {
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.toc__link'));
+    if (!links.length) return;
 
-<style is:global>
-  .toc-list a.active {
-    color: var(--color-primary);
-    font-weight: 600;
-    border-left-color: var(--color-primary);
-    background-color: var(--color-bg-secondary);
+    const map = new Map<string, HTMLElement>();
+    for (const link of links) {
+      const id = link.dataset.heading;
+      if (!id) continue;
+      const target = document.getElementById(id);
+      if (target) map.set(id, target);
+    }
+    if (!map.size) return;
+
+    const setActive = (id: string) => {
+      links.forEach(l => l.classList.toggle('is-active', l.dataset.heading === id));
+    };
+
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          const id = (e.target as HTMLElement).id;
+          if (id) setActive(id);
+        }
+      }
+    }, { rootMargin: '-25% 0px -55% 0px', threshold: 0 });
+
+    map.forEach(el => io.observe(el));
   }
-</style>
+  bootTOC();
+  document.addEventListener('astro:page-load', bootTOC);
+</script>

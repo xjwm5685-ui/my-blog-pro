@@ -1,128 +1,101 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
+import Constellation from '@components/Constellation.astro';
+import LightBeam from '@components/LightBeam.astro';
 ---
 
-<BaseLayout title="404 - 页面未找到">
-  <div class="container">
-    <div class="error-page">
-      <div class="error-content">
-        <h1 class="error-code">404</h1>
-        <h2 class="error-title">页面未找到</h2>
-        <p class="error-description">
-          抱歉，您访问的页面不存在或已被移除。
-        </p>
-        <div class="error-actions">
-          <a href="/" class="btn btn-primary">返回首页</a>
-          <a href="/blog" class="btn btn-secondary">浏览文章</a>
-        </div>
-      </div>
-      <div class="error-illustration">
-        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="100" cy="100" r="80" fill="var(--color-bg-secondary)" />
-          <circle cx="80" cy="90" r="8" fill="var(--color-text)" />
-          <circle cx="120" cy="90" r="8" fill="var(--color-text)" />
-          <path d="M 70 130 Q 100 110 130 130" stroke="var(--color-text)" stroke-width="4" fill="none" stroke-linecap="round" />
-        </svg>
+<BaseLayout title="404 — Lost in space" description="Page not found">
+  <section class="four">
+    <LightBeam side="right" intensity={0.6} />
+
+    <div class="four__inner shell">
+      <span class="bracket-label" data-reveal>SIGNAL · LOST</span>
+
+      <h1 class="four__code" data-reveal style="--reveal-delay: 80ms">
+        <span style="animation-delay: 80ms">4</span><span style="animation-delay: 160ms">0</span><span style="animation-delay: 240ms">4</span>
+      </h1>
+
+      <p class="four__lede" data-reveal style="--reveal-delay: 240ms">
+        这片星空里没有这条路径。<br/>
+        <span class="four__lede-en">The path you took drifted out of orbit.</span>
+      </p>
+
+      <div class="four__cta" data-reveal style="--reveal-delay: 320ms">
+        <a href="/"     class="pill">RETURN HOME <span class="arrow">↗</span></a>
+        <a href="/blog" class="pill pill--ghost">BROWSE ARCHIVE <span class="arrow">↗</span></a>
       </div>
     </div>
-  </div>
+
+    <div class="four__cosmos">
+      <Constellation height="48vh" density={120} minimal={true} />
+    </div>
+  </section>
 </BaseLayout>
 
 <style>
-  .error-page {
+  .four {
+    position: relative;
+    min-height: calc(100vh - var(--nav-h));
+    display: grid;
+    grid-template-rows: 1fr auto;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .four__inner {
+    position: relative;
+    z-index: 5;
+    align-self: center;
+    padding-block: var(--s-10);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 60vh;
-    text-align: center;
-    padding: var(--spacing-xl) 0;
+    align-items: flex-start;
+    gap: 1.6rem;
   }
-  
-  .error-content {
-    max-width: 500px;
-    margin-bottom: var(--spacing-xl);
+
+  .four__code {
+    font-family: var(--font-display);
+    font-weight: 200;
+    font-size: clamp(7rem, 26vw, 22rem);
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+    color: var(--text);
+    margin: 0;
+    text-shadow:
+      0 0 80px rgba(190, 210, 255, 0.18),
+      0 0 160px rgba(255, 240, 220, 0.06);
   }
-  
-  .error-code {
-    font-size: 6rem;
-    font-weight: 700;
-    color: var(--color-primary);
-    margin-bottom: var(--spacing-md);
-    line-height: 1;
-  }
-  
-  .error-title {
-    font-size: 2rem;
-    margin-bottom: var(--spacing-md);
-  }
-  
-  .error-description {
-    font-size: 1.125rem;
-    color: var(--color-text-secondary);
-    margin-bottom: var(--spacing-xl);
-  }
-  
-  .error-actions {
-    display: flex;
-    gap: var(--spacing-md);
-    justify-content: center;
-  }
-  
-  .btn {
+  .four__code span {
     display: inline-block;
-    padding: var(--spacing-sm) var(--spacing-lg);
-    border-radius: var(--radius-md);
-    font-weight: 600;
-    transition: all 0.2s ease;
+    opacity: 0;
+    transform: translateY(0.3em);
+    filter: blur(12px);
+    animation: letterRise 1100ms var(--ease-out) forwards;
   }
-  
-  .btn-primary {
-    background-color: var(--color-primary);
-    color: white;
+
+  .four__lede {
+    color: var(--text-dim);
+    font-family: var(--font-cn);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    max-width: 50ch;
   }
-  
-  .btn-primary:hover {
-    background-color: var(--color-primary-hover);
+  .four__lede-en {
+    font-family: var(--font-display);
+    color: var(--text-muted);
+    font-size: 0.92em;
+    font-style: italic;
   }
-  
-  .btn-secondary {
-    background-color: var(--color-bg-secondary);
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
+
+  .four__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
   }
-  
-  .btn-secondary:hover {
-    background-color: var(--color-border);
-  }
-  
-  .error-illustration {
-    width: 200px;
-    height: 200px;
-    opacity: 0.5;
-  }
-  
-  @media (max-width: 768px) {
-    .error-code {
-      font-size: 4rem;
-    }
-    
-    .error-title {
-      font-size: 1.5rem;
-    }
-    
-    .error-description {
-      font-size: 1rem;
-    }
-    
-    .error-actions {
-      flex-direction: column;
-      width: 100%;
-    }
-    
-    .btn {
-      width: 100%;
-    }
+
+  .four__cosmos {
+    position: relative;
+    z-index: 1;
+    margin-top: -8vh;
   }
 </style>
-

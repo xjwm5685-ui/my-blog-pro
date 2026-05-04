@@ -5,115 +5,183 @@ import { SITE_CONFIG } from '@/config';
 
 interface Props {
   post: Post;
+  index?: number;
 }
-
-const { post } = Astro.props;
+const { post, index = 0 } = Astro.props;
 const { title, description, pubDate, category, tags } = post.data;
-const categoryConfig = SITE_CONFIG.categories[category];
+const cat = SITE_CONFIG.categories[category];
+
+// `MAY 5, 2026` style mono date
+const dateMono = new Date(pubDate).toLocaleDateString('en-US', {
+  month: 'long', day: 'numeric', year: 'numeric'
+}).toUpperCase();
+
+const delay = `${index * 80}ms`;
 ---
 
-<article class="post-item">
-  <div class="post-meta">
-    <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
-    <span class="separator">/</span>
-    <a href={`/category/${category}`} class="category-link">{categoryConfig.displayName}</a>
+<article class="row" data-reveal style={`--reveal-delay: ${delay};`}>
+  <a class="row__link" href={`/blog/${post.slug}`} aria-label={title} data-row-link></a>
+
+  <div class="row__date">
+    <span class="row__date-mono">{dateMono}</span>
   </div>
-  
-  <h2 class="post-title">
-    <a href={`/blog/${post.slug}`}>{title}</a>
-  </h2>
-  
-  <p class="post-description">{description}</p>
-  
-  {tags && tags.length > 0 && (
-    <div class="post-tags">
-      {tags.map(tag => (
-        <a href={`/tags/${tag}`} class="tag">#{tag}</a>
-      ))}
+
+  <div class="row__body">
+    <h3 class="row__title">{title}</h3>
+    <p class="row__desc">{description}</p>
+
+    <div class="row__meta">
+      <a class="row__cat" href={`/category/${category}`}>[ {cat.displayName.toUpperCase()} · {cat.name.toUpperCase()} ]</a>
+      {tags && tags.length > 0 && (
+        <span class="row__tags">
+          {tags.slice(0, 3).map(t => <span class="row__tag">#{t}</span>)}
+        </span>
+      )}
     </div>
-  )}
+  </div>
+
+  <div class="row__cta">
+    <span class="pill">READ <span class="arrow">↗</span></span>
+  </div>
 </article>
 
 <style>
-  .post-item {
-    padding: var(--spacing-lg) 0;
-    border-bottom: 1px solid var(--color-border);
+  .row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 160px 1fr auto;
+    align-items: start;
+    gap: 2.4rem;
+    padding: 1.85rem 0;
+    border-top: 1px solid var(--border);
+    transition: background-color var(--dur) var(--ease-soft);
+    cursor: pointer;
   }
-  
-  .post-item:last-child {
-    border-bottom: none;
+
+  .row:last-child { border-bottom: 1px solid var(--border); }
+
+  /* Invisible full-row click target — sits ABOVE non-interactive children
+     so the entire row reliably navigates to the article. Inner anchors
+     (category, tags) get a higher z-index to remain individually clickable. */
+  .row__link {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    text-indent: -9999px;
+    overflow: hidden;
+    background: transparent;
   }
-  
-  .post-meta {
-    font-size: 0.85rem;
-    color: var(--color-text-secondary);
-    margin-bottom: var(--spacing-xs);
-    font-family: var(--font-mono); /* 使用等宽字体，更有技术文档感 */
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+
+  .row__date,
+  .row__body,
+  .row__cta { position: relative; z-index: 1; }
+
+  /* Inner interactive elements that should win over the overlay link */
+  .row__cat { position: relative; z-index: 4; }
+
+  .row::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(255,255,255,0.04), transparent 60%);
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease-soft);
+    pointer-events: none;
+    z-index: 0;
   }
-  
-  .separator {
-    margin: 0 0.5em;
-    opacity: 0.5;
+
+  .row:hover::before { opacity: 1; }
+  .row:hover .row__title { color: #fff; }
+  .row:hover .pill {
+    border-color: var(--border-bright);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 28px -10px rgba(190, 210, 255, 0.30);
   }
-  
-  .category-link {
-    color: var(--color-text-secondary);
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
+  .row:hover .pill .arrow { transform: translate(2px, -2px); }
+
+  /* Date column */
+  .row__date {
+    padding-top: 0.4rem;
+    color: var(--text-muted);
   }
-  
-  .category-link:hover {
-    color: var(--color-primary);
-    border-bottom-color: var(--color-primary);
-  }
-  
-  .post-title {
-    font-family: var(--font-heading); /* 衬线体标题 */
-    font-size: 1.75rem; /* 加大标题 */
-    margin-bottom: var(--spacing-xs);
-    line-height: 1.25;
-    font-weight: 600;
-  }
-  
-  .post-title a {
-    color: var(--color-text);
-    text-decoration: none;
-    border-bottom: none;
-  }
-  
-  .post-title a:hover {
-    color: var(--color-primary); /* 悬停变色 */
-  }
-  
-  .post-description {
-    color: var(--color-text-secondary);
-    line-height: 1.6;
-    margin-bottom: var(--spacing-sm);
-    font-size: 1.05rem; /* 稍微加大正文 */
-  }
-  
-  .post-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
-  }
-  
-  .tag {
+  .row__date-mono {
     font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--color-text-secondary);
-    text-decoration: none;
-    border-bottom: none;
-    background-color: var(--color-bg-secondary);
-    padding: 0.1rem 0.4rem;
-    border-radius: var(--radius-sm);
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
   }
-  
-  .tag:hover {
-    color: var(--color-primary);
-    background-color: var(--color-border); /* 稍微深一点的背景 */
+
+  /* Body */
+  .row__body { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .row__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 1.4vw, 1.4rem);
+    font-weight: 400;
+    color: var(--text-soft);
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    transition: color var(--dur) var(--ease-soft);
+  }
+
+  .row__desc {
+    color: var(--text-dim);
+    font-size: 0.92rem;
+    line-height: 1.55;
+    max-width: 70ch;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .row__meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 0.4rem;
+  }
+
+  .row__cat {
+    position: relative;
+    z-index: 3;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.22em;
+    color: var(--text-muted);
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+  .row__cat:hover { color: var(--text); }
+
+  .row__tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .row__tag {
+    font-family: var(--font-cn);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+  }
+
+  /* CTA — pill aligned to right */
+  .row__cta {
+    align-self: center;
+    pointer-events: none;
+  }
+  .row__cta .pill {
+    pointer-events: none;
+    color: var(--text);
+  }
+
+  @media (max-width: 760px) {
+    .row {
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+      padding: 1.4rem 0;
+    }
+    .row__date { padding-top: 0; }
+    .row__cta { display: none; }
   }
 </style>
-

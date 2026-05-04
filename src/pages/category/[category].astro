@@ -6,72 +6,116 @@ import { SITE_CONFIG, type Category } from '@/config';
 
 export async function getStaticPaths() {
   const categories = Object.keys(SITE_CONFIG.categories) as Category[];
-  
   return Promise.all(
     categories.map(async (category) => {
       const posts = await getPostsByCategory(category);
-      return {
-        params: { category },
-        props: { posts, category }
-      };
+      return { params: { category }, props: { posts, category } };
     })
   );
 }
 
 const { posts, category } = Astro.props;
-const categoryConfig = SITE_CONFIG.categories[category as Category];
+const cat = SITE_CONFIG.categories[category as Category];
+const total = posts.length.toString().padStart(2, '0');
 ---
 
 <BaseLayout
-  title={`${categoryConfig.displayName} - ${SITE_CONFIG.title}`}
-  description={categoryConfig.description}
+  title={`${cat.displayName} · ${cat.name.toUpperCase()} — ${SITE_CONFIG.title}`}
+  description={cat.description}
   currentCategory={category}
 >
-  <div class="container">
-    <header class="category-header">
-      <h1 class="category-title">{categoryConfig.displayName}</h1>
-      <p class="category-description">{categoryConfig.description}</p>
+  <div class="cat shell">
+    <header class="cat__head" data-reveal>
+      <span class="bracket-label">CATEGORY · {cat.name.toUpperCase()}</span>
+      <h1 class="cat__title">
+        {cat.displayName}<br/>
+        <span class="cat__title-en">{cat.tagline}</span>
+      </h1>
+      <p class="cat__lede">{cat.description}</p>
+
+      <div class="cat__meter">
+        <span class="cat__meter-label">CONTENT</span>
+        <span class="cat__meter-line"></span>
+        <span class="cat__meter-count">{total} ARTICLES</span>
+      </div>
     </header>
-    
-    <div class="posts-list">
-      {posts.map((post) => (
-        <PostCard post={post} />
-      ))}
-    </div>
-    
-    {posts.length === 0 && (
-      <div class="empty-state">
-        <p>No posts found.</p>
+
+    {posts.length > 0 ? (
+      <div class="cat__rows">
+        {posts.map((post, i) => <PostCard post={post} index={i} />)}
+      </div>
+    ) : (
+      <div class="cat__empty">
+        <span class="bracket-label">EMPTY</span>
+        <p>暂无文章 · No posts here yet.</p>
       </div>
     )}
   </div>
 </BaseLayout>
 
 <style>
-  .category-header {
-    padding: var(--spacing-xl) 0;
-    margin-bottom: var(--spacing-lg);
-    border-bottom: 1px solid var(--color-border);
+  .cat { padding-block: var(--s-10) var(--s-14); }
+
+  .cat__head {
+    max-width: 880px;
+    margin-bottom: var(--s-10);
+    padding-bottom: var(--s-6);
+    border-bottom: 1px solid var(--border);
   }
-  
-  .category-title {
-    font-size: 2.5rem;
-    margin-bottom: var(--spacing-sm);
+
+  .cat__title {
+    margin-top: 1rem;
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
+    font-weight: 200;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--text);
   }
-  
-  .category-description {
-    font-size: 1.125rem;
-    color: var(--color-text-secondary);
+  .cat__title-en {
+    font-family: var(--font-display);
+    font-size: 0.4em;
+    color: var(--text-muted);
+    font-style: italic;
+    letter-spacing: -0.01em;
   }
-  
-  .posts-list {
+
+  .cat__lede {
+    margin-top: 1rem;
+    color: var(--text-dim);
+    font-family: var(--font-cn);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    max-width: 60ch;
+  }
+
+  .cat__meter {
+    margin-top: 1.6rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+  .cat__meter-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border-strong), transparent);
+    max-width: 240px;
+  }
+  .cat__meter-count { color: var(--text); }
+
+  .cat__empty {
+    padding: var(--s-8);
+    border: 1px dashed var(--border-strong);
+    text-align: center;
+    color: var(--text-dim);
     display: flex;
     flex-direction: column;
-  }
-  
-  .empty-state {
-    padding: var(--spacing-xl) 0;
-    color: var(--color-text-secondary);
+    gap: 0.6rem;
+    align-items: center;
   }
 </style>
-

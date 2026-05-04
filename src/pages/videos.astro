@@ -2,175 +2,145 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { SITE_CONFIG } from '@/config';
 
-// B站视频列表
 const videos = [
-  { bvid: 'BV1wXQHYBEtt', title: '视频教程 1' },
-  { bvid: 'BV1FJKezFETE', title: '视频教程 2' },
-  { bvid: 'BV1GQKYzEEfs', title: '视频教程 3' },
-  { bvid: 'BV1yqrNBoEh3', title: '视频教程 4' },
-  { bvid: 'BV1m8rNBaEaX', title: '视频教程 5' },
-  { bvid: 'BV1M8rNBYEj2', title: '视频教程 6' },
-  { bvid: 'BV1ubrNBPEg3', title: '视频教程 7' },
-  { bvid: 'BV1UbrNBAEGD', title: '视频教程 8' },
-  { bvid: 'BV1UbrNBAE3n', title: '视频教程 9' },
-  { bvid: 'BV12YrNB8EW8', title: '视频教程 10' },
-  { bvid: 'BV1xYrNBhEZe', title: '视频教程 11' },
-  { bvid: 'BV14YrNBhEqb', title: '视频教程 12' },
+  { bvid: 'BV1wXQHYBEtt' },
+  { bvid: 'BV1FJKezFETE' },
+  { bvid: 'BV1GQKYzEEfs' },
+  { bvid: 'BV1yqrNBoEh3' },
+  { bvid: 'BV1m8rNBaEaX' },
+  { bvid: 'BV1M8rNBYEj2' },
+  { bvid: 'BV1ubrNBPEg3' },
+  { bvid: 'BV1UbrNBAEGD' },
+  { bvid: 'BV1UbrNBAE3n' },
+  { bvid: 'BV12YrNB8EW8' },
+  { bvid: 'BV1xYrNBhEZe' },
+  { bvid: 'BV14YrNBhEqb' }
 ];
 ---
 
 <BaseLayout
-  title={`视频教程 - ${SITE_CONFIG.title}`}
+  title={`视频教程 · VIDEOS — ${SITE_CONFIG.title}`}
   description={`${SITE_CONFIG.author}的B站视频教程合集`}
 >
-  <div class="videos-container">
-    <header class="videos-header">
-      <h1>视频教程</h1>
-      <p class="videos-desc">
-        我在 B 站发布的教程视频合集，欢迎
-        <a href={SITE_CONFIG.bilibili} target="_blank" rel="noopener noreferrer">关注我的 B 站频道</a>
+  <div class="vid shell">
+    <header class="vid__head" data-reveal>
+      <span class="bracket-label">VIDEOS</span>
+      <h1 class="vid__title">
+        视频教程<br/>
+        <span class="vid__title-en">A small library of walkthroughs.</span>
+      </h1>
+      <p class="vid__lede">
+        我在 B 站发布的教程视频合集。
+        <a href={SITE_CONFIG.bilibili} target="_blank" rel="noopener" class="vid__inline-link">关注 B 站频道 ↗</a>
         获取更多内容。
       </p>
     </header>
 
-    <div class="videos-grid">
-      {videos.map((video, index) => (
-        <div class="video-card">
-          <div class="video-wrapper">
+    <div class="vid__grid">
+      {videos.map((v, i) => (
+        <article class="vcard" data-reveal style={`--reveal-delay: ${(i % 6) * 70}ms;`}>
+          <div class="vcard__head">
+            <span class="vcard__index">#{(i + 1).toString().padStart(2, '0')}</span>
+            <span class="bracket-label">BILIBILI</span>
+          </div>
+
+          <div class="vcard__player">
             <iframe
-              src={`//player.bilibili.com/player.html?bvid=${video.bvid}&page=1`}
-              scrolling="no"
-              border="0"
-              frameborder="no"
-              framespacing="0"
-              allowfullscreen="true"
+              src={`//player.bilibili.com/player.html?bvid=${v.bvid}&page=1&high_quality=1`}
               loading="lazy"
+              allowfullscreen
+              frameborder="0"
+              scrolling="no"
             ></iframe>
           </div>
-          <div class="video-info">
-            <span class="video-index">#{index + 1}</span>
-            <a
-              href={`https://www.bilibili.com/video/${video.bvid}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="video-link"
-            >
-              在 B 站观看 →
-            </a>
-          </div>
-        </div>
+
+          <a class="vcard__cta pill pill--ghost" href={`https://www.bilibili.com/video/${v.bvid}`} target="_blank" rel="noopener">
+            WATCH ON BILIBILI <span class="arrow">↗</span>
+          </a>
+        </article>
       ))}
     </div>
   </div>
 </BaseLayout>
 
 <style>
-  .videos-container {
-    max-width: 1200px;
-    margin: 0;
-    padding-right: var(--spacing-lg);
-  }
+  .vid { padding-block: var(--s-10) var(--s-14); }
 
-  .videos-header {
-    margin-bottom: var(--spacing-xl);
+  .vid__head { max-width: 800px; margin-bottom: var(--s-10); }
+  .vid__title {
+    margin-top: 1rem;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2rem, 4.5vw, 3.4rem);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
   }
-
-  .videos-header h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    font-family: var(--font-heading);
-    margin-bottom: var(--spacing-md);
-    color: var(--color-text);
+  .vid__title-en {
+    font-family: var(--font-display);
+    font-size: 0.55em;
+    color: var(--text-muted);
+    font-style: italic;
   }
-
-  .videos-desc {
-    font-size: 1.1rem;
-    color: var(--color-text-secondary);
-    line-height: 1.6;
+  .vid__lede {
+    margin-top: 1rem;
+    color: var(--text-dim);
+    font-family: var(--font-cn);
+    font-size: 1rem;
+    line-height: 1.65;
   }
-
-  .videos-desc a {
-    color: var(--color-primary);
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.2s ease;
+  .vid__inline-link {
+    color: var(--text);
+    border-bottom: 1px solid var(--border-strong);
   }
+  .vid__inline-link:hover { border-bottom-color: var(--beam-cool); }
 
-  .videos-desc a:hover {
-    border-bottom-color: var(--color-primary);
-  }
-
-  .videos-grid {
+  .vid__grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.4rem;
   }
+  @media (max-width: 1100px) { .vid__grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 640px)  { .vid__grid { grid-template-columns: 1fr; } }
 
-  .video-card {
-    background-color: var(--color-bg-secondary);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    border: 1px solid var(--color-border);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  .vcard {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    transition: border-color var(--dur) var(--ease-soft);
   }
+  .vcard:hover { border-color: var(--border-strong); }
 
-  .video-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-
-  .video-wrapper {
-    position: relative;
-    width: 100%;
-    padding-bottom: 60%; /* 16:10 比例 */
-    overflow: hidden;
-  }
-
-  .video-wrapper iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-  }
-
-  .video-info {
+  .vcard__head {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-sm) var(--spacing-md);
+    align-items: baseline;
   }
-
-  .video-index {
+  .vcard__index {
     font-family: var(--font-mono);
-    font-size: 0.9rem;
-    color: var(--color-text-secondary);
-    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    color: var(--text);
   }
 
-  .video-link {
-    font-size: 0.85rem;
-    color: var(--color-primary);
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.2s ease;
+  .vcard__player {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--border);
+    background: var(--bg-elev);
+    overflow: hidden;
+  }
+  .vcard__player iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
   }
 
-  .video-link:hover {
-    border-bottom-color: var(--color-primary);
-  }
-
-  @media (max-width: 768px) {
-    .videos-header h1 {
-      font-size: 2rem;
-    }
-
-    .videos-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .videos-container {
-      padding-right: 0;
-    }
-  }
+  .vcard__cta { align-self: flex-start; }
 </style>

@@ -158,6 +158,97 @@ declare module 'astro:content' {
   collection: "blog";
   data: InferEntrySchema<"blog">
 } & { render(): Render[".md"] };
+"openclaw就是ai噱头-别让你的技术洁癖-挡住了时代的入场券.md": {
+	id: "openclaw就是ai噱头-别让你的技术洁癖-挡住了时代的入场券.md";
+  slug: "openclaw就是ai噱头-别让你的技术洁癖-挡住了时代的入场券";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
+"python-断点调试总结.md": {
+	id: "python-断点调试总结.md";
+  slug: "python-断点调试总结";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
+"python中为什么会有-copy-直接赋值不好吗.md": {
+	id: "python中为什么会有-copy-直接赋值不好吗.md";
+  slug: "python中为什么会有-copy-直接赋值不好吗";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
+"再游南昌城.md": {
+	id: "再游南昌城.md";
+  slug: "再游南昌城";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
+"小米mimo.md": {
+	id: "小米mimo.md";
+  slug: "小米mimo";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
+"我花-6-小时搞懂-wsl-windows-程序员的终极开发环境-超真实踩坑教程.md": {
+	id: "我花-6-小时搞懂-wsl-windows-程序员的终极开发环境-超真实踩坑教程.md";
+  slug: "我花-6-小时搞懂-wsl-windows-程序员的终极开发环境-超真实踩坑教程";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
+"手把手教你安装-hermes-agent-附白嫖小米mimo大模型配置教程.md": {
+	id: "手把手教你安装-hermes-agent-附白嫖小米mimo大模型配置教程.md";
+  slug: "手把手教你安装-hermes-agent-附白嫖小米mimo大模型配置教程";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
+"泰兰德的夏天-摄影篇.md": {
+	id: "泰兰德的夏天-摄影篇.md";
+  slug: "泰兰德的夏天-摄影篇";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
+"绍兴游记.md": {
+	id: "绍兴游记.md";
+  slug: "绍兴游记";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
+"解决pycharm每次新建项目都要重新安装第三方库的问题.md": {
+	id: "解决pycharm每次新建项目都要重新安装第三方库的问题.md";
+  slug: "解决pycharm每次新建项目都要重新安装第三方库的问题";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
+"豆包pc端王炸更新-独立ai-豆包浏览器-云盘-我直接告别文件传输助手.md": {
+	id: "豆包pc端王炸更新-独立ai-豆包浏览器-云盘-我直接告别文件传输助手.md";
+  slug: "豆包pc端王炸更新-独立ai-豆包浏览器-云盘-我直接告别文件传输助手";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
+"轻松搞懂openclaw安全投毒事件-全解析攻击链路与防御建议-看完再也不敢乱装skill了.md": {
+	id: "轻松搞懂openclaw安全投毒事件-全解析攻击链路与防御建议-看完再也不敢乱装skill了.md";
+  slug: "轻松搞懂openclaw安全投毒事件-全解析攻击链路与防御建议-看完再也不敢乱装skill了";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
+"重庆-镜头下的山城-一半烟火一半诗意.md": {
+	id: "重庆-镜头下的山城-一半烟火一半诗意.md";
+  slug: "重庆-镜头下的山城-一半烟火一半诗意";
+  body: string;
+  collection: "blog";
+  data: InferEntrySchema<"blog">
+} & { render(): Render[".md"] };
 };
 
 	};
@@ -168,5 +259,5 @@ declare module 'astro:content' {
 
 	type AnyEntryMap = ContentEntryMap & DataEntryMap;
 
-	export type ContentConfig = typeof import("../../src/content/config.js");
+	export type ContentConfig = typeof import("./../../src/content/config.js");
 }

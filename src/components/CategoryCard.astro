@@ -1,0 +1,341 @@
+---
+/**
+ * CategoryCard — x.ai-style product card with full 3D tilt.
+ *
+ * Outer wrapper sets the perspective.
+ * Inner card rotateX/Y based on cursor position.
+ * Title / icon / pill float on different translateZ planes for parallax.
+ */
+interface Props {
+  bracket: string;
+  title: string;
+  description: string;
+  href: string;
+  tagline?: string;
+  icon: 'tech' | 'notes' | 'travel';
+  index?: number;
+}
+const { bracket, title, description, href, tagline, icon, index = 0 } = Astro.props;
+const delay = `${index * 120}ms`;
+---
+
+<div class="card-stage" data-reveal style={`--reveal-delay: ${delay};`}>
+  <a class="card" href={href}>
+    <span class="card__shine" aria-hidden="true"></span>
+
+    <div class="card__head">
+      <span class="card__bracket">[ {bracket} ]</span>
+      <span class="card__index">0{index + 1}</span>
+    </div>
+
+    <div class="card__title-row">
+      <h3 class="card__title">{title}</h3>
+      {tagline && <p class="card__tagline">{tagline}</p>}
+    </div>
+
+    <p class="card__desc">{description}</p>
+
+    <div class="card__art" aria-hidden="true">
+      {icon === 'tech' && (
+        <svg viewBox="0 0 240 140" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="0.7">
+          <rect x="20" y="22" width="200" height="96" rx="2"/>
+          <line x1="20" y1="40" x2="220" y2="40"/>
+          <circle cx="32" cy="31" r="1.5"/>
+          <circle cx="40" cy="31" r="1.5"/>
+          <circle cx="48" cy="31" r="1.5"/>
+          <line x1="36" y1="58" x2="120" y2="58"/>
+          <line x1="36" y1="68" x2="200" y2="68"/>
+          <line x1="36" y1="78" x2="160" y2="78"/>
+          <line x1="36" y1="88" x2="100" y2="88"/>
+          <line x1="36" y1="98" x2="180" y2="98"/>
+        </svg>
+      )}
+      {icon === 'notes' && (
+        <svg viewBox="0 0 240 140" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="0.7">
+          <path d="M40 18 L180 18 L200 38 L200 122 L40 122 Z"/>
+          <path d="M180 18 L180 38 L200 38"/>
+          <line x1="55" y1="48" x2="170" y2="48"/>
+          <line x1="55" y1="60" x2="185" y2="60"/>
+          <line x1="55" y1="72" x2="150" y2="72"/>
+          <line x1="55" y1="84" x2="170" y2="84"/>
+          <line x1="55" y1="96" x2="120" y2="96"/>
+          <line x1="55" y1="108" x2="160" y2="108"/>
+          <circle cx="48" cy="48" r="1.2" fill="currentColor"/>
+          <circle cx="48" cy="60" r="1.2" fill="currentColor"/>
+          <circle cx="48" cy="72" r="1.2" fill="currentColor"/>
+        </svg>
+      )}
+      {icon === 'travel' && (
+        <svg viewBox="0 0 240 140" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="0.7">
+          <circle cx="120" cy="70" r="48"/>
+          <ellipse cx="120" cy="70" rx="48" ry="22"/>
+          <ellipse cx="120" cy="70" rx="22" ry="48"/>
+          <line x1="72" y1="70" x2="168" y2="70"/>
+          <line x1="120" y1="22" x2="120" y2="118"/>
+          <circle cx="120" cy="70" r="2.5" fill="currentColor"/>
+          <circle cx="156" cy="58" r="1.5" fill="currentColor" opacity="0.6"/>
+          <circle cx="92"  cy="86" r="1.5" fill="currentColor" opacity="0.6"/>
+        </svg>
+      )}
+    </div>
+
+    <span class="card__cta">
+      EXPLORE <span class="arrow">↗</span>
+    </span>
+
+    <span class="card__corner card__corner--tl"></span>
+    <span class="card__corner card__corner--tr"></span>
+    <span class="card__corner card__corner--bl"></span>
+    <span class="card__corner card__corner--br"></span>
+  </a>
+</div>
+
+<style>
+  .card-stage {
+    perspective: 1400px;
+    perspective-origin: center;
+  }
+
+  .card {
+    --mx: 50%;
+    --my: 50%;
+    --rx: 0deg;
+    --ry: 0deg;
+    --lift: 0px;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    padding: 1.6rem 1.5rem 1.4rem;
+    min-height: 360px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-soft);
+    overflow: hidden;
+    isolation: isolate;
+    transform-origin: center;
+    transform: translate3d(0, calc(var(--lift) * -1), 0)
+               rotateX(var(--rx)) rotateY(var(--ry));
+    transition:
+      transform 240ms var(--ease-soft),
+      border-color var(--dur) var(--ease-soft),
+      background-color var(--dur) var(--ease-soft),
+      box-shadow var(--dur) var(--ease-soft);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(320px circle at var(--mx) var(--my),
+        rgba(255, 255, 255, 0.10),
+        transparent 45%);
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease-soft);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* moving glare strip — like light hitting a metal panel */
+  .card__shine {
+    position: absolute;
+    inset: -10%;
+    background: linear-gradient(
+      105deg,
+      transparent 38%,
+      rgba(255, 255, 255, 0.07) 48%,
+      rgba(190, 210, 255, 0.10) 50%,
+      rgba(255, 255, 255, 0.07) 52%,
+      transparent 62%
+    );
+    transform: translateX(calc(var(--mx) - 50%));
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease-soft);
+    pointer-events: none;
+    mix-blend-mode: screen;
+    z-index: 1;
+  }
+
+  .card:hover {
+    --lift: 8px;
+    border-color: var(--border-strong);
+    background: var(--bg-hover);
+    box-shadow:
+      0 30px 60px -30px rgba(0, 0, 0, 0.85),
+      0 14px 40px -20px rgba(190, 210, 255, 0.18),
+      0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  }
+  .card:hover::before { opacity: 1; }
+  .card:hover .card__shine { opacity: 1; }
+
+  /* Inner content — kept on the same plane for crisp text.
+     Excludes absolutely-positioned overlays (shine, corners). */
+  .card > *:not(.card__corner):not(.card__shine) {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Corner brackets — true corners, no Z translation.
+     `!important` guards against any blanket child rule above. */
+  .card__corner {
+    position: absolute !important;
+    width: 12px;
+    height: 12px;
+    border: 0 solid var(--text);
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease-soft);
+    pointer-events: none;
+    z-index: 3;
+  }
+  .card__corner--tl { top: 8px    !important; left: 8px    !important; right: auto !important; bottom: auto !important; border-top-width: 1px; border-left-width: 1px; }
+  .card__corner--tr { top: 8px    !important; right: 8px   !important; left: auto  !important; bottom: auto !important; border-top-width: 1px; border-right-width: 1px; }
+  .card__corner--bl { bottom: 8px !important; left: 8px    !important; right: auto !important; top: auto    !important; border-bottom-width: 1px; border-left-width: 1px; }
+  .card__corner--br { bottom: 8px !important; right: 8px   !important; left: auto  !important; top: auto    !important; border-bottom-width: 1px; border-right-width: 1px; }
+  .card:hover .card__corner { opacity: 0.7; }
+
+  .card__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.28em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .card__bracket { color: var(--text-dim); }
+  .card__index { color: var(--text-faint); }
+
+  .card__title-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .card__title {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: var(--text);
+    letter-spacing: -0.015em;
+  }
+  .card__tagline {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .card__desc {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--text-dim);
+    max-width: 32ch;
+  }
+
+  .card__art {
+    flex: 1;
+    min-height: 110px;
+    margin-top: auto;
+    color: var(--text-faint);
+    transition: color var(--dur) var(--ease-soft);
+  }
+  .card:hover .card__art { color: var(--text-dim); }
+
+  .card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    align-self: flex-start;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-pill);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.02);
+    transition:
+      border-color var(--dur) var(--ease-soft),
+      background-color var(--dur) var(--ease-soft),
+      box-shadow var(--dur) var(--ease-soft);
+  }
+  .card__cta .arrow {
+    display: inline-block;
+    transition: transform var(--dur) var(--ease-soft);
+  }
+  .card:hover .card__cta {
+    border-color: var(--border-bright);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 6px 24px -8px rgba(190, 210, 255, 0.35);
+  }
+  .card:hover .card__cta .arrow { transform: translate(2px, -2px); }
+
+  @media (max-width: 640px) {
+    .card-stage { perspective: none; }
+    .card { transform: none !important; min-height: 300px; padding: 1.3rem 1.2rem 1.2rem; }
+    .card__title { font-size: 1.35rem; }
+  }
+</style>
+
+<script>
+  function tilt(card: HTMLElement, max = 9) {
+    const stage = card.parentElement;
+    if (!stage) return;
+    let raf = 0;
+    let nx = 0, ny = 0;          // current normalised cursor (-1..1)
+    let cx = 0, cy = 0;          // smoothed
+    let rect: DOMRect | null = null;
+
+    const apply = () => {
+      cx += (nx - cx) * 0.18;
+      cy += (ny - cy) * 0.18;
+      const rx = (cy *  max).toFixed(2);
+      const ry = (cx * -max).toFixed(2);
+      card.style.setProperty('--rx', `${rx}deg`);
+      card.style.setProperty('--ry', `${ry}deg`);
+      // also update spotlight + shine in pixel space using the live rect
+      if (rect) {
+        const px = ((nx + 1) * 0.5) * rect.width;
+        const py = ((ny + 1) * 0.5) * rect.height;
+        card.style.setProperty('--mx', `${px}px`);
+        card.style.setProperty('--my', `${py}px`);
+      }
+      if (Math.abs(nx - cx) + Math.abs(ny - cy) > 0.001) {
+        raf = requestAnimationFrame(apply);
+      } else {
+        raf = 0;
+      }
+    };
+
+    const onMove = (e: MouseEvent) => {
+      rect = card.getBoundingClientRect();
+      nx = ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+      ny = ((e.clientY - rect.top)  / rect.height) * 2 - 1;
+      if (!raf) raf = requestAnimationFrame(apply);
+    };
+    const onLeave = () => {
+      nx = 0; ny = 0;
+      if (!raf) raf = requestAnimationFrame(apply);
+    };
+
+    card.addEventListener('mousemove', onMove);
+    card.addEventListener('mouseleave', onLeave);
+  }
+
+  function init() {
+    document.querySelectorAll<HTMLElement>('.card-stage > .card').forEach((c) => {
+      if ((c as any).__tilt) return;
+      (c as any).__tilt = true;
+      tilt(c);
+    });
+  }
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

@@ -4,84 +4,128 @@ import { getAllTags } from '@/utils/post';
 import { SITE_CONFIG } from '@/config';
 
 const tags = await getAllTags();
+const maxCount = tags.reduce((m, t) => Math.max(m, t.count), 1);
 ---
 
 <BaseLayout
-  title={`标签 - ${SITE_CONFIG.title}`}
+  title={`标签 · TAGS — ${SITE_CONFIG.title}`}
   description="按标签浏览文章"
 >
-  <div class="container">
-    <header class="tags-header">
-      <h1 class="tags-title">标签</h1>
-      <p class="tags-description">共 {tags.length} 个标签</p>
+  <div class="tg shell">
+    <header class="tg__head" data-reveal>
+      <span class="bracket-label">TAGS</span>
+      <h1 class="tg__title">
+        所有标签<br/>
+        <span class="tg__title-en">Browse by tag.</span>
+      </h1>
+
+      <div class="tg__meter">
+        <span class="tg__meter-label">INDEX</span>
+        <span class="tg__meter-line"></span>
+        <span class="tg__meter-count">{tags.length.toString().padStart(2, '0')} TAGS</span>
+      </div>
     </header>
-    
-    <div class="tags-cloud">
-      {tags.map(({ tag, count }) => (
-        <a 
-          href={`/tags/${tag}`} 
-          class="tag-item"
-          style={`font-size: ${Math.min(1 + count * 0.2, 2)}rem;`}
-        >
-          #{tag}
-          <span class="tag-count">({count})</span>
-        </a>
-      ))}
+
+    <div class="tg__cloud">
+      {tags.map(({ tag, count }, i) => {
+        const weight = 0.4 + (count / maxCount) * 0.6;
+        const size   = 0.85 + weight * 0.7;
+        return (
+          <a
+            href={`/tags/${tag}`}
+            class="tg__pill"
+            data-reveal
+            style={`font-size:${size}rem;--w:${weight};--reveal-delay:${(i % 12) * 30}ms;`}
+          >
+            <span class="tg__hash">#</span><span class="tg__name">{tag}</span><span class="tg__count">{count}</span>
+          </a>
+        );
+      })}
     </div>
   </div>
 </BaseLayout>
 
 <style>
-  .tags-header {
-    text-align: center;
-    padding: var(--spacing-xl) 0;
-    margin-bottom: var(--spacing-xl);
+  .tg { padding-block: var(--s-10) var(--s-14); }
+
+  .tg__head {
+    max-width: 880px;
+    margin-bottom: var(--s-10);
+    padding-bottom: var(--s-6);
+    border-bottom: 1px solid var(--border);
   }
-  
-  .tags-title {
-    font-size: 2.5rem;
-    margin-bottom: var(--spacing-md);
+  .tg__title {
+    margin-top: 1rem;
+    font-family: var(--font-display);
+    font-weight: 200;
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
+    letter-spacing: -0.03em;
+    line-height: 1.05;
   }
-  
-  .tags-description {
-    font-size: 1.125rem;
-    color: var(--color-text-secondary);
+  .tg__title-en {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 0.4em;
+    color: var(--text-muted);
+    letter-spacing: -0.01em;
   }
-  
-  .tags-cloud {
+
+  .tg__meter {
+    margin-top: 1.6rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+  .tg__meter-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border-strong), transparent);
+    max-width: 240px;
+  }
+  .tg__meter-count { color: var(--text); }
+
+  .tg__cloud {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--spacing-md);
-    padding: var(--spacing-xl);
+    gap: 0.6rem 0.8rem;
+    align-items: center;
   }
-  
-  .tag-item {
-    color: var(--color-primary);
-    font-weight: 500;
-    transition: all 0.2s ease;
+
+  .tg__pill {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    padding: 0.45rem 0.95rem;
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    color: var(--text-soft);
+    background: rgba(255, 255, 255, calc(0.012 * var(--w, 0.5)));
+    font-family: var(--font-cn);
     line-height: 1;
+    transition:
+      border-color var(--dur) var(--ease-soft),
+      background var(--dur) var(--ease-soft),
+      color var(--dur-fast) var(--ease-soft),
+      transform var(--dur) var(--ease-soft);
   }
-  
-  .tag-item:hover {
-    transform: scale(1.1);
-    color: var(--color-primary-hover);
+  .tg__pill:hover {
+    border-color: var(--border-bright);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    transform: translateY(-1px);
   }
-  
-  .tag-count {
-    font-size: 0.75em;
-    color: var(--color-text-secondary);
-    margin-left: 0.25em;
-  }
-  
-  @media (max-width: 768px) {
-    .tags-title {
-      font-size: 2rem;
-    }
-    
-    .tags-cloud {
-      padding: var(--spacing-md);
-    }
+  .tg__hash { color: var(--text-muted); font-family: var(--font-mono); }
+  .tg__name { letter-spacing: 0.01em; }
+  .tg__count {
+    font-family: var(--font-mono);
+    font-size: 0.65em;
+    color: var(--text-muted);
+    margin-left: 0.4em;
+    letter-spacing: 0.18em;
   }
 </style>
-

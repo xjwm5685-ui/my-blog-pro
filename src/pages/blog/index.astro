@@ -1,0 +1,135 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import PostCard from '@components/PostCard.astro';
+import { getAllPosts } from '@/utils/post';
+import { SITE_CONFIG } from '@/config';
+
+const posts = await getAllPosts();
+
+// Group by year
+const byYear = new Map<number, typeof posts>();
+for (const p of posts) {
+  const y = new Date(p.data.pubDate).getFullYear();
+  if (!byYear.has(y)) byYear.set(y, []);
+  byYear.get(y)!.push(p);
+}
+const years = Array.from(byYear.keys()).sort((a, b) => b - a);
+---
+
+<BaseLayout
+  title={`归档 · ARCHIVE — ${SITE_CONFIG.title}`}
+  description="所有文章按年份归档"
+>
+  <div class="arc shell">
+    <header class="arc__head" data-reveal>
+      <span class="bracket-label">ARCHIVE</span>
+      <h1 class="arc__title">
+        全部文章<br/>
+        <span class="arc__title-en">A complete index, ordered by time.</span>
+      </h1>
+
+      <div class="arc__meter">
+        <span class="arc__meter-label">TOTAL</span>
+        <span class="arc__meter-line"></span>
+        <span class="arc__meter-count">{posts.length.toString().padStart(2, '0')} ARTICLES · {years.length.toString().padStart(2, '0')} YEARS</span>
+      </div>
+    </header>
+
+    <div class="arc__years">
+      {years.map((y, yi) => (
+        <section class="arc__year" data-reveal style={`--reveal-delay: ${yi * 80}ms;`}>
+          <div class="arc__year-head">
+            <span class="arc__year-num">{y}</span>
+            <span class="arc__year-line"></span>
+            <span class="arc__year-count">{byYear.get(y)!.length.toString().padStart(2, '0')}</span>
+          </div>
+          <div class="arc__rows">
+            {byYear.get(y)!.map((post, i) => <PostCard post={post} index={i} />)}
+          </div>
+        </section>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .arc { padding-block: var(--s-10) var(--s-14); }
+
+  .arc__head {
+    max-width: 880px;
+    margin-bottom: var(--s-10);
+    padding-bottom: var(--s-6);
+    border-bottom: 1px solid var(--border);
+  }
+  .arc__title {
+    margin-top: 1rem;
+    font-family: var(--font-display);
+    font-weight: 200;
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+  .arc__title-en {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 0.4em;
+    color: var(--text-muted);
+    letter-spacing: -0.01em;
+  }
+  .arc__meter {
+    margin-top: 1.6rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+  .arc__meter-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border-strong), transparent);
+    max-width: 240px;
+  }
+  .arc__meter-count { color: var(--text); }
+
+  .arc__years {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-10);
+  }
+
+  .arc__year-head {
+    display: flex;
+    align-items: baseline;
+    gap: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  .arc__year-num {
+    font-family: var(--font-display);
+    font-weight: 200;
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .arc__year-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .arc__year-count {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .arc__rows {
+    display: flex;
+    flex-direction: column;
+  }
+</style>

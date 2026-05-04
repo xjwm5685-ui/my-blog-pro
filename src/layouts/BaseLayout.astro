@@ -1,128 +1,243 @@
 ---
 import Header from '@components/Header.astro';
 import Footer from '@components/Footer.astro';
-import LeftSidebar from '@components/LeftSidebar.astro';
-import TableOfContents from '@components/TableOfContents.astro'; // 重新引入 TOC
+import TableOfContents from '@components/TableOfContents.astro';
+import { ViewTransitions } from 'astro:transitions';
 import '@/styles/global.css';
 import { getSEO, type SEOProps } from '@/utils/seo';
 import type { MarkdownHeading } from 'astro';
+import { SITE_CONFIG } from '@/config';
 
 interface Props extends SEOProps {
   class?: string;
   currentSlug?: string;
   currentCategory?: string;
-  headings?: MarkdownHeading[]; 
+  headings?: MarkdownHeading[];
 }
 
-const { 
-  title, 
-  description, 
-  image, 
-  article, 
-  publishedTime, 
-  tags, 
+const {
+  title,
+  description,
+  image,
+  article,
+  publishedTime,
+  tags,
   class: className,
-  currentSlug,
-  currentCategory,
-  headings 
+  headings
 } = Astro.props;
 
 const seo = getSEO({ title, description, image, article, publishedTime, tags });
 const hasTOC = headings && headings.length > 0;
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <meta name="generator" content={Astro.generator}>
-  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="generator" content={Astro.generator} />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+
   <title>{seo.title}</title>
-  <meta name="description" content={seo.description}>
-  
-  <meta property="og:type" content={seo.openGraph.type}>
-  <meta property="og:title" content={seo.openGraph.title}>
-  <meta property="og:description" content={seo.openGraph.description}>
-  <meta property="og:image" content={seo.openGraph.image}>
-  
-  <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/rss.xml">
+  <meta name="description" content={seo.description} />
+  <meta name="theme-color" content="#000000" />
+
+  <meta property="og:type" content={seo.openGraph.type} />
+  <meta property="og:title" content={seo.openGraph.title} />
+  <meta property="og:description" content={seo.openGraph.description} />
+  <meta property="og:image" content={seo.openGraph.image} />
+
+  <link rel="alternate" type="application/rss+xml" title={`${SITE_CONFIG.title} RSS`} href="/rss.xml" />
+  <ViewTransitions />
 </head>
+
 <body>
   <Header />
-  
-  <div class="layout-container">
-    <LeftSidebar currentSlug={currentSlug} currentCategory={currentCategory} />
-    
+
+  <div class="shell-grid">
+    <main class:list={['main', { 'main--with-toc': hasTOC }, className]}>
+      <slot />
+    </main>
+
     {hasTOC && (
-      <aside class="toc-sidebar">
-        <div class="toc-inner">
-          <TableOfContents headings={headings} />
-        </div>
+      <aside class="toc-aside" aria-label="Table of contents">
+        <TableOfContents headings={headings!} />
       </aside>
     )}
-    
-    <main class:list={['main-content', { 'with-toc': hasTOC }, className]}>
-      <slot />
-      <Footer />
-    </main>
   </div>
+
+  <Footer />
+
+  <script>
+    /* ---- IntersectionObserver fade-up reveals ---- */
+    function bindReveal() {
+      const els = document.querySelectorAll<HTMLElement>('[data-reveal]:not(.is-visible)');
+      if (!els.length || !('IntersectionObserver' in window)) {
+        els.forEach(el => el.classList.add('is-visible'));
+        return;
+      }
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            (e.target as HTMLElement).classList.add('is-visible');
+            io.unobserve(e.target);
+          }
+        }
+      }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+      els.forEach(el => io.observe(el));
+    }
+
+    /* ---- Magnetic pills — gentle pull toward cursor on hover ---- */
+    function bindMagnetic() {
+      document.querySelectorAll<HTMLElement>('.pill, .row__cta .pill, .nav__cta').forEach((el) => {
+        if ((el as any).__mag) return;
+        (el as any).__mag = true;
+        let raf = 0;
+        let tx = 0, ty = 0, cx = 0, cy = 0;
+        const strength = 8;
+
+        const apply = () => {
+          cx += (tx - cx) * 0.18;
+          cy += (ty - cy) * 0.18;
+          el.style.setProperty('--mx', `${cx.toFixed(2)}px`);
+          el.style.setProperty('--my', `${cy.toFixed(2)}px`);
+          if (Math.abs(tx - cx) + Math.abs(ty - cy) > 0.05) {
+            raf = requestAnimationFrame(apply);
+          } else {
+            raf = 0;
+          }
+        };
+
+        el.addEventListener('mousemove', (e) => {
+          const r = el.getBoundingClientRect();
+          tx = ((e.clientX - r.left) / r.width  - 0.5) * strength * 2;
+          ty = ((e.clientY - r.top)  / r.height - 0.5) * strength * 2;
+          if (!raf) raf = requestAnimationFrame(apply);
+        });
+        el.addEventListener('mouseleave', () => {
+          tx = 0; ty = 0;
+          if (!raf) raf = requestAnimationFrame(apply);
+        });
+      });
+    }
+
+    /* ---- Subtle 3D entry on section reveals (desktop only) ---- */
+    function bind3DReveal() {
+      if (window.matchMedia('(max-width: 720px)').matches) return;
+      const sections = document.querySelectorAll<HTMLElement>('section.block, .arc__year, .bio__section');
+      if (!sections.length) return;
+      sections.forEach((s) => {
+        if ((s as any).__3d) return;
+        (s as any).__3d = true;
+        s.style.transformStyle = 'preserve-3d';
+      });
+
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          const el = e.target as HTMLElement;
+          if (e.isIntersecting) {
+            el.style.transition = 'opacity 900ms var(--ease-out), transform 900ms var(--ease-out)';
+            el.style.opacity = '1';
+            el.style.transform = 'perspective(1400px) rotateX(0deg) translateZ(0)';
+            io.unobserve(el);
+          }
+        }
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
+
+      sections.forEach((s) => {
+        if (s.classList.contains('--3d-init')) return;
+        s.classList.add('--3d-init');
+        s.style.opacity = '0';
+        s.style.transform = 'perspective(1400px) rotateX(7deg) translateZ(-40px)';
+        io.observe(s);
+      });
+    }
+
+    /* ---- Generic 3D tilt for [data-tilt] elements ---- */
+    function bindTilt() {
+      if (window.matchMedia('(max-width: 720px)').matches) return;
+      document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((el) => {
+        if ((el as any).__tilt) return;
+        (el as any).__tilt = true;
+        const max = Number(el.dataset.tiltMax || '7');
+        let raf = 0;
+        let tx = 0, ty = 0, cx = 0, cy = 0;
+        el.style.transformStyle = 'preserve-3d';
+        el.style.willChange = 'transform';
+        const apply = () => {
+          cx += (tx - cx) * 0.16;
+          cy += (ty - cy) * 0.16;
+          el.style.transform =
+            `perspective(1200px) rotateX(${(cy * max).toFixed(2)}deg) rotateY(${(cx * -max).toFixed(2)}deg) translateZ(0)`;
+          if (Math.abs(tx - cx) + Math.abs(ty - cy) > 0.001) {
+            raf = requestAnimationFrame(apply);
+          } else {
+            raf = 0;
+          }
+        };
+        el.addEventListener('mousemove', (e) => {
+          const r = el.getBoundingClientRect();
+          tx = ((e.clientX - r.left) / r.width)  * 2 - 1;
+          ty = ((e.clientY - r.top)  / r.height) * 2 - 1;
+          el.style.setProperty('--mx', `${e.clientX - r.left}px`);
+          el.style.setProperty('--my', `${e.clientY - r.top}px`);
+          if (!raf) raf = requestAnimationFrame(apply);
+        });
+        el.addEventListener('mouseleave', () => {
+          tx = 0; ty = 0;
+          if (!raf) raf = requestAnimationFrame(apply);
+        });
+      });
+    }
+
+    function bootAll() { bindReveal(); bindMagnetic(); bind3DReveal(); bindTilt(); }
+    bootAll();
+    document.addEventListener('astro:page-load', bootAll);
+  </script>
 </body>
 </html>
 
 <style>
-  .layout-container {
-    display: flex;
-    width: 100%;
-    padding-top: 60px;
-    min-height: 100vh;
-  }
-  
-  /* 中间 TOC 侧边栏 */
-  .toc-sidebar {
-    width: 240px;
-    position: fixed;
-    top: 60px;
-    bottom: 0;
-    left: 280px; /* 紧接在 LeftSidebar 之后 */
-    overflow-y: auto;
-    background-color: var(--color-bg); /* 与背景一致，或微调 */
-    border-right: 1px solid var(--color-border); /* 可选分割线 */
-    z-index: 890;
-  }
-  
-  .toc-inner {
-    padding: var(--spacing-lg) var(--spacing-md);
+  body {
+    padding-top: var(--nav-h);
   }
 
-  /* 主内容区域 */
-  .main-content {
-    flex: 1;
-    margin-left: 280px; /* 默认只避开左侧栏 */
-    padding: var(--spacing-xl);
+  .shell-grid {
+    position: relative;
+    width: 100%;
+    min-height: calc(100vh - var(--nav-h));
+  }
+
+  .main {
+    width: 100%;
     min-width: 0;
   }
-  
-  /* 当存在 TOC 时，增加左边距 */
-  .main-content.with-toc {
-    margin-left: 520px; /* 280px + 240px */
+
+  /* When article has a TOC, two-column shell with TOC floating right */
+  .main--with-toc {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-inline: var(--shell-px);
+    padding-right: 280px;
+    padding-block: var(--s-10) var(--s-14);
   }
-  
-  @media (max-width: 1200px) {
-    /* 平板尺寸：隐藏 TOC 栏，或者改为抽屉式（这里先隐藏） */
-    .toc-sidebar {
-      display: none;
-    }
-    .main-content.with-toc {
-      margin-left: 280px;
-    }
+
+  .toc-aside {
+    position: fixed;
+    top: calc(var(--nav-h) + var(--s-8));
+    right: max(var(--shell-px), calc((100vw - 1200px) / 2 + var(--shell-px)));
+    width: 220px;
+    max-height: calc(100vh - var(--nav-h) - var(--s-10));
+    overflow-y: auto;
+    z-index: 50;
   }
-  
-  @media (max-width: 1024px) {
-    .main-content, .main-content.with-toc {
-      margin-left: 0;
-      padding: var(--spacing-lg) var(--spacing-md);
-    }
+
+  @media (max-width: 1100px) {
+    .main--with-toc { padding-right: var(--shell-px); }
+    .toc-aside { display: none; }
   }
 </style>

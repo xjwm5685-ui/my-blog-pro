@@ -3,112 +3,115 @@ import BaseLayout from '@layouts/BaseLayout.astro';
 import { SITE_CONFIG } from '@/config';
 
 const techStack = [
-  { name: 'Python', percent: 100, color: '#3572A5', desc: '主要开发语言，用于脚本与自动化' },
-  { name: 'Java', percent: 80, color: '#b07219', desc: '熟悉 Java SE 及面向对象设计' },
-  { name: 'JavaScript', percent: 70, color: '#f1e05a', desc: '能够进行基本的前端开发' },
-  { name: 'Vue', percent: 70, color: '#41b883', desc: '熟悉 Vue 生态系统' },
-  { name: 'SpringBoot', percent: 60, color: '#6db33f', desc: '具备后端服务开发能力' },
-  { name: 'HTML/CSS', percent: 60, color: '#e34c26', desc: '页面布局与样式调整' },
-  { name: 'C++', percent: 40, color: '#f34b7d', desc: '算法学习与底层逻辑探索' },
+  { name: 'Python',     pct: 100, desc: '主要开发语言 · 脚本与自动化' },
+  { name: 'Java',       pct:  80, desc: 'Java SE · 面向对象设计' },
+  { name: 'JavaScript', pct:  70, desc: '基本前端开发 · DOM · 工具脚本' },
+  { name: 'Vue',        pct:  70, desc: 'Vue 生态 · 组件化开发' },
+  { name: 'SpringBoot', pct:  60, desc: '后端服务 · REST · 中间件' },
+  { name: 'HTML / CSS', pct:  60, desc: '页面布局 · 样式调整' },
+  { name: 'C++',        pct:  40, desc: '算法学习 · 底层逻辑' }
+];
+
+const focusAreas = [
+  { label: 'Tech',    cn: '技术笔记',   note: 'Python · Java · SpringBoot 学习心得与踩坑记录' },
+  { label: 'Build',   cn: '项目实战',   note: '个人项目的开发过程复盘与技术总结' },
+  { label: 'Algo',    cn: '算法与逻辑', note: 'C++ 算法学习与思考' },
+  { label: 'Notes',   cn: '生活随笔',   note: '阅读、旅行、时间感与日常感悟' }
 ];
 ---
 
 <BaseLayout
-  title={`关于 - ${SITE_CONFIG.title}`}
+  title={`关于 · ABOUT — ${SITE_CONFIG.title}`}
   description={`关于 ${SITE_CONFIG.author}`}
 >
-  <div class="about-container">
-    
-    <div class="about-content">
-      {/* 左侧 Profile */}
-      <aside class="profile-card">
-        <div class="avatar-wrapper">
-          <img src={SITE_CONFIG.avatar} alt={SITE_CONFIG.author} class="avatar">
+  <div class="about shell">
+    <header class="about__hero" data-reveal>
+      <span class="bracket-label">ABOUT</span>
+      <h1 class="about__title">
+        Hi, I'm <span class="hl">{SITE_CONFIG.authorEn}</span>.<br/>
+        <span class="about__title-cn">你好，我是 {SITE_CONFIG.author}。</span>
+      </h1>
+      <p class="about__lede">
+        一名热衷于计算机技术的开发者与学习者，ID 是 <strong>WYHEF</strong>（五氧化二钒的缩写）。
+        我喜欢探索代码背后的逻辑，也享受用工具去解决具体问题。
+      </p>
+    </header>
+
+    <div class="about__grid">
+      <!-- LEFT: profile -->
+      <aside class="profile">
+        <div class="profile__portrait" data-reveal>
+          <img src={SITE_CONFIG.avatar} alt={SITE_CONFIG.author} loading="lazy" />
+          <span class="profile__corner profile__corner--tl"></span>
+          <span class="profile__corner profile__corner--tr"></span>
+          <span class="profile__corner profile__corner--bl"></span>
+          <span class="profile__corner profile__corner--br"></span>
         </div>
-        <div class="profile-info">
-          <h1 class="profile-name">{SITE_CONFIG.author}</h1>
-          <p class="profile-login">WYHEF</p>
-          <p class="profile-bio">记录技术、学习与生活。</p>
-          
-          <div class="social-links">
-            <a href={SITE_CONFIG.github} target="_blank" rel="noopener noreferrer" class="social-link" title="GitHub">
-              <svg class="icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
-              GitHub
-            </a>
-            <a href={SITE_CONFIG.bilibili} target="_blank" rel="noopener noreferrer" class="social-link" title="Bilibili">
-               <svg class="icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="13" rx="2" ry="2"></rect><path d="M17 2l-5 5-5-5"></path></svg>
-              Bilibili
-            </a>
-            <a href={`mailto:${SITE_CONFIG.email}`} class="social-link" title="Email">
-              <svg class="icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-              {SITE_CONFIG.email}
-            </a>
-            
-            {/* 微信公众号 - 带二维码悬浮窗 */}
-            <div class="social-link wechat-trigger" title="微信扫码关注">
-              <svg class="icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 13.5l-1.5 2.5v-2.5h-1c-2.5 0-4.5-2-4.5-4.5s2-4.5 4.5-4.5 4.5 2 4.5 4.5c0 1-.5 2-1.5 3z"></path><path d="M17.5 12c-2.5 0-4.5 2-4.5 4.5s2 4.5 4.5 4.5c1 0 2-.5 2.5-1v1h2.5l-1.5-2.5c1-1 1.5-2 1.5-3 0-2.5-2-4.5-4.5-4.5z"></path></svg>
-              <span class="wechat-text">公众号：{SITE_CONFIG.wechat}</span>
-              
-              {/* 二维码弹出层 */}
-              <div class="qr-popup">
-                <img src="/qrcode.jpg" alt="微信公众号二维码" class="qr-img">
-                <span class="qr-tip">扫码关注</span>
-              </div>
+
+        <div class="profile__name" data-reveal style="--reveal-delay: 80ms">
+          <h2 class="profile__title">{SITE_CONFIG.authorEn}</h2>
+          <span class="profile__sub">{SITE_CONFIG.author}</span>
+        </div>
+
+        <ul class="profile__links" data-reveal style="--reveal-delay: 160ms">
+          <li><a class="profile__link" href={SITE_CONFIG.github}   target="_blank" rel="noopener"><span class="bracket-label">GH</span><span>GitHub</span><span class="arrow">↗</span></a></li>
+          <li><a class="profile__link" href={SITE_CONFIG.bilibili} target="_blank" rel="noopener"><span class="bracket-label">BL</span><span>Bilibili</span><span class="arrow">↗</span></a></li>
+          <li><a class="profile__link" href={`mailto:${SITE_CONFIG.email}`}><span class="bracket-label">EM</span><span>{SITE_CONFIG.email}</span></a></li>
+          <li class="profile__link wechat"><span class="bracket-label">WX</span><span>{SITE_CONFIG.wechat}</span>
+            <div class="qr">
+              <img src="/qrcode.jpg" alt="WeChat QR" />
+              <span>扫码关注</span>
             </div>
-          </div>
-        </div>
+          </li>
+        </ul>
       </aside>
 
-      {/* 右侧 Content */}
-      <article class="bio-text">
-        <section class="intro-section">
-          <h2>你好，我是吴煜凡。</h2>
-          <p>
-            欢迎来到我的个人博客。我是一名热衷于计算机技术的开发者和学习者，ID 是 <strong>WYHEF</strong>（也就是五氧化二钒的缩写）。
-          </p>
-          <p>
-            我热衷于探索代码背后的逻辑，同时也享受构建工具来解决实际问题的过程。目前，我主要关注后端开发、脚本自动化以及 Web 全栈技术。
-          </p>
-        </section>
-
-        <section>
+      <!-- RIGHT: long-form -->
+      <article class="bio">
+        <section class="bio__section" data-reveal>
+          <span class="bracket-label">SECTION · 01</span>
           <h3>关于本站</h3>
           <p>
-            建立这个博客的初衷是为了构建一个属于自己的知识库。在这个信息碎片化的时代，我希望通过长文写作来沉淀思考，记录学习过程中的灵光一现。
+            建立这个博客是为了构建一个属于自己的知识库。在这个信息碎片化的时代，
+            我希望通过长文写作来沉淀思考，记录学习过程中的灵光一现。
           </p>
-          <p>在这里，你主要会看到以下内容：</p>
-          <ul class="status-list">
-            <li><strong>技术笔记</strong>：关于 Python, Java, SpringBoot 等技术的学习心得与踩坑记录。</li>
-            <li><strong>项目实战</strong>：个人项目的开发过程复盘与技术总结。</li>
-            <li><strong>算法与逻辑</strong>：在 C++ 算法学习过程中的思考。</li>
-            <li><strong>生活随笔</strong>：关于旅行、阅读和生活的些许感悟。</li>
+
+          <ul class="focus-list">
+            {focusAreas.map(f => (
+              <li>
+                <span class="focus-list__bracket">[ {f.label.toUpperCase()} ]</span>
+                <span class="focus-list__cn">{f.cn}</span>
+                <span class="focus-list__note">{f.note}</span>
+              </li>
+            ))}
           </ul>
         </section>
-        
-        <section>
+
+        <section class="bio__section" data-reveal>
+          <span class="bracket-label">SECTION · 02</span>
           <h3>技术栈</h3>
-          <p>以下是我目前主要使用的技术工具与熟练度：</p>
-          
-          <div class="tech-stack">
-            {techStack.map(tech => (
-              <div class="tech-item">
-                <div class="tech-header">
-                  <span class="tech-name">{tech.name}</span>
-                  <span class="tech-desc">{tech.desc}</span>
+          <p>以下是我目前主要使用的技术工具与熟练度。</p>
+
+          <div class="stack">
+            {techStack.map((t, i) => (
+              <div class="stack__row" style={`--i: ${i};`}>
+                <div class="stack__head">
+                  <span class="stack__name">{t.name}</span>
+                  <span class="stack__pct">{t.pct.toString().padStart(3, '0')}%</span>
                 </div>
-                <div class="progress-bar">
-                  <div class="progress-fill" style={`width: ${tech.percent}%; background-color: ${tech.color};`}></div>
-                </div>
+                <div class="stack__bar"><span style={`width: ${t.pct}%`}></span></div>
+                <span class="stack__desc">{t.desc}</span>
               </div>
             ))}
           </div>
         </section>
 
-        <section>
+        <section class="bio__section" data-reveal>
+          <span class="bracket-label">SECTION · 03</span>
           <h3>联系我</h3>
           <p>
             如果你对我的文章感兴趣，或者有技术问题想要交流，欢迎通过左侧的社交链接联系我。
-            你也可以关注我的微信公众号 <strong>“五氧化二钒不是废钒”</strong>，获取更多动态。
+            你也可以关注我的微信公众号 <strong>"五氧化二钒不是废钒"</strong> 获取更多动态。
           </p>
         </section>
       </article>
@@ -117,288 +120,289 @@ const techStack = [
 </BaseLayout>
 
 <style>
-  .about-container {
-    max-width: 1000px;
-    margin: 0;
-    padding-right: var(--spacing-lg);
+  .about { padding-block: var(--s-10) var(--s-14); }
+
+  .about__hero {
+    max-width: 960px;
+    margin-bottom: var(--s-10);
   }
-  
-  .about-content {
+  .about__title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2rem, 4.5vw, 3.4rem);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-top: 1rem;
+    color: var(--text);
+  }
+  .about__title .hl {
+    color: var(--text);
+    text-decoration: underline;
+    text-decoration-color: var(--border-strong);
+    text-underline-offset: 6px;
+    text-decoration-thickness: 1px;
+  }
+  .about__title-cn {
+    font-family: var(--font-cn);
+    font-size: 0.6em;
+    color: var(--text-dim);
+    font-weight: 300;
+  }
+  .about__lede {
+    margin-top: 1rem;
+    color: var(--text-dim);
+    font-family: var(--font-cn);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    max-width: 56ch;
+  }
+  .about__lede strong { color: var(--text); font-weight: 500; }
+
+  .about__grid {
     display: grid;
     grid-template-columns: 280px 1fr;
-    gap: var(--spacing-xl);
+    gap: clamp(2rem, 5vw, 5rem);
     align-items: start;
   }
-  
-  /* 左侧 Profile */
-  .profile-card {
+
+  /* ====== LEFT PROFILE ====== */
+  .profile {
     position: sticky;
-    top: 100px;
+    top: calc(var(--nav-h) + var(--s-6));
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
   }
-  
-  .avatar-wrapper {
+
+  .profile__portrait {
+    position: relative;
     width: 100%;
     aspect-ratio: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     overflow: hidden;
-    border-radius: var(--radius-md);
-    margin-bottom: var(--spacing-md);
-    background-color: var(--color-bg-secondary);
   }
-  
-  .avatar {
+  .profile__portrait img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    filter: grayscale(0.2) contrast(1.06);
+    transition: filter var(--dur) var(--ease-soft);
   }
-  
-  .profile-name {
+  .profile__portrait:hover img { filter: grayscale(0) contrast(1.1); }
+
+  .profile__corner {
+    position: absolute;
+    width: 12px; height: 12px;
+    border: 0 solid var(--text);
+    opacity: 0.55;
+  }
+  .profile__corner--tl { top: 6px; left: 6px;   border-top-width: 1px; border-left-width: 1px; }
+  .profile__corner--tr { top: 6px; right: 6px;  border-top-width: 1px; border-right-width: 1px; }
+  .profile__corner--bl { bottom: 6px; left: 6px; border-bottom-width: 1px; border-left-width: 1px; }
+  .profile__corner--br { bottom: 6px; right: 6px; border-bottom-width: 1px; border-right-width: 1px; }
+
+  .profile__name { display: flex; flex-direction: column; gap: 0.25rem; }
+  .profile__title {
+    font-family: var(--font-display);
     font-size: 1.5rem;
-    font-family: var(--font-heading);
-    font-weight: 700;
-    margin-bottom: 0;
-    line-height: 1.2;
-    color: var(--color-text);
+    font-weight: 300;
+    color: var(--text);
+    letter-spacing: -0.015em;
   }
-  
-  .profile-login {
-    font-size: 1.1rem;
-    color: var(--color-text-secondary);
-    font-weight: 400;
-    margin-bottom: var(--spacing-md);
-    font-family: var(--font-mono);
-  }
-  
-  .profile-bio {
-    font-size: 0.95rem;
-    line-height: 1.6;
-    margin-bottom: var(--spacing-lg);
-    color: var(--color-text-secondary);
-  }
-  
-  .social-links {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    border-top: 1px solid var(--color-border);
-    padding-top: var(--spacing-md);
-  }
-  
-  .social-link {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: var(--color-text-secondary);
-    font-size: 0.9rem;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    cursor: pointer; /* 让非链接元素也显示手型 */
-    position: relative; /* 为弹出层定位 */
-  }
-  
-  .social-link:hover {
-    color: var(--color-primary);
-  }
-  
-  /* 图标通用样式 */
-  .icon {
-    width: 1.2rem;
-    height: 1.2rem;
-    stroke-width: 2;
-    opacity: 0.8;
-  }
-  
-  .social-link:hover .icon {
-    opacity: 1;
+  .profile__sub {
+    font-family: var(--font-cn);
+    font-size: 0.86rem;
+    color: var(--text-dim);
   }
 
-  /* 微信二维码弹出层 */
-  .wechat-trigger:hover .qr-popup {
-    display: flex;
-    animation: fadeIn 0.2s ease-out;
-  }
-
-  .qr-popup {
-    display: none;
-    position: absolute;
-    bottom: 100%; /* 显示在上方 */
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: var(--color-bg);
-    border: 1px solid var(--color-border);
-    padding: 10px;
-    border-radius: var(--radius-md);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    flex-direction: column;
-    align-items: center;
-    z-index: 100;
-    margin-bottom: 10px;
-    width: 140px;
-  }
-
-  /* 小三角箭头 */
-  .qr-popup::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -6px;
-    border-width: 6px;
-    border-style: solid;
-    border-color: var(--color-bg) transparent transparent transparent;
-  }
-  
-  .qr-popup::before {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -7px;
-    border-width: 7px;
-    border-style: solid;
-    border-color: var(--color-border) transparent transparent transparent;
-    z-index: -1;
-  }
-
-  .qr-img {
-    width: 120px;
-    height: 120px;
-    object-fit: contain;
-    margin-bottom: 5px;
-    background-color: #f0f0f0; /* 二维码占位背景 */
-  }
-
-  .qr-tip {
-    font-size: 0.75rem;
-    color: var(--color-text-secondary);
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translate(-50%, 10px); }
-    to { opacity: 1; transform: translate(-50%, 0); }
-  }
-  
-  /* 右侧 Content */
-  .bio-text {
-    font-size: 1.05rem;
-    line-height: 1.8;
-  }
-
-  .bio-text h2 {
-    font-size: 1.75rem;
-    margin-bottom: var(--spacing-md);
-    font-weight: 700;
-    color: var(--color-text);
-    font-family: var(--font-heading);
-  }
-  
-  .bio-text h3 {
-    font-size: 1.25rem;
-    margin-top: var(--spacing-xl);
-    margin-bottom: var(--spacing-md);
-    font-weight: 600;
-    color: var(--color-text);
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .bio-text p {
-    margin-bottom: 1.5em;
-    color: var(--color-text);
-  }
-  
-  /* 列表样式 */
-  .status-list {
-    list-style-type: none;
-    margin: 0 0 1.5em 0;
+  .profile__links {
+    list-style: none;
+    margin: 0;
     padding: 0;
-  }
-  
-  .status-list li {
-    margin-bottom: 0.75rem;
-    padding-left: 1.2rem;
-    position: relative;
-    line-height: 1.6;
-    color: var(--color-text);
-  }
-  
-  .status-list li::before {
-    content: "•";
-    position: absolute;
-    left: 0;
-    color: var(--color-primary);
-    font-weight: bold;
-  }
-  
-  /* 技能进度条 */
-  .tech-stack {
+    border-top: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
-    margin-bottom: var(--spacing-lg);
+  }
+  .profile__links li { border-bottom: 1px solid var(--border); }
+
+  .profile__link {
+    position: relative;
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0;
+    color: var(--text-soft);
+    transition: color var(--dur-fast) var(--ease-soft);
+    font-family: var(--font-cn);
+    font-size: 0.88rem;
+  }
+  .profile__link .bracket-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    color: var(--text-faint);
+  }
+  .profile__link:hover { color: var(--text); }
+  .profile__link .arrow { color: var(--text-muted); }
+
+  .profile__link.wechat { cursor: help; }
+  .profile__link.wechat:hover .qr {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+  .qr {
+    position: absolute;
+    left: calc(100% + 1rem);
+    top: 50%;
+    transform: translate(-10px, -50%);
+    width: 160px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-strong);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur) var(--ease-soft), transform var(--dur) var(--ease-soft);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+    z-index: 30;
+  }
+  .qr img { width: 140px; height: 140px; object-fit: contain; }
+  .qr span {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  /* ====== RIGHT BIO ====== */
+  .bio { display: flex; flex-direction: column; gap: var(--s-10); }
+
+  .bio__section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .bio__section h3 {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 1.6rem;
+    color: var(--text);
+    letter-spacing: -0.015em;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .bio__section p {
+    color: var(--text-soft);
+    font-family: var(--font-cn);
+    font-size: 0.98rem;
+    line-height: 1.75;
+    max-width: 64ch;
+  }
+  .bio__section p strong { color: var(--text); font-weight: 500; }
+
+  /* focus list */
+  .focus-list {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    max-width: 640px;
+  }
+  .focus-list li {
+    display: grid;
+    grid-template-columns: 70px 100px 1fr;
+    gap: 1rem;
+    align-items: baseline;
+    padding: 0.7rem 0;
+    border-bottom: 1px dashed var(--border);
+    font-family: var(--font-cn);
+  }
+  .focus-list__bracket {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.22em;
+    color: var(--text-muted);
+  }
+  .focus-list__cn { color: var(--text); font-size: 0.95rem; }
+  .focus-list__note { color: var(--text-dim); font-size: 0.86rem; }
+
+  /* tech stack */
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
     margin-top: 1rem;
   }
-  
-  .tech-header {
+  .stack__row { display: flex; flex-direction: column; gap: 0.4rem; }
+  .stack__head {
     display: flex;
     justify-content: space-between;
-    font-size: 0.9rem;
-    margin-bottom: 0.4rem;
+    align-items: baseline;
   }
-  
-  .tech-name {
-    font-weight: 600;
+  .stack__name {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+  .stack__pct {
     font-family: var(--font-mono);
-    color: var(--color-text);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    color: var(--text-muted);
   }
-  
-  .tech-desc {
-    color: var(--color-text-secondary);
-    font-size: 0.85rem;
-  }
-  
-  .progress-bar {
+  .stack__bar {
     width: 100%;
-    height: 6px;
-    background-color: var(--color-bg-secondary);
-    border-radius: 3px;
-    overflow: hidden;
+    height: 1px;
+    background: var(--border);
+    overflow: visible;
+    position: relative;
   }
-  
-  .progress-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.8s ease-out;
+  .stack__bar span {
+    display: block;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(190, 210, 255, 0.65), rgba(255, 255, 255, 0.85));
+    box-shadow: 0 0 12px rgba(190, 210, 255, 0.35);
+    transform-origin: left;
+    animation: stackFill 1200ms var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * 90ms);
   }
-  
-  @media (max-width: 768px) {
-    .about-content {
-      grid-template-columns: 1fr;
-    }
-    
-    .profile-card {
+  @keyframes stackFill { from { width: 0; } }
+  .stack__desc {
+    font-family: var(--font-cn);
+    font-size: 0.82rem;
+    color: var(--text-dim);
+  }
+
+  @media (max-width: 900px) {
+    .about__grid { grid-template-columns: 1fr; }
+    .profile {
       position: static;
-      margin-bottom: var(--spacing-xl);
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: var(--spacing-lg);
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 1.2rem;
+      padding-bottom: var(--s-6);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--s-6);
     }
-    
-    .avatar-wrapper {
-      width: 100px;
-    }
-    
-    .about-container {
-      padding-right: 0;
-    }
-    
-    /* 移动端二维码位置调整 */
-    .qr-popup {
+    .profile__portrait { width: 140px; }
+    .profile__name, .profile__links { grid-column: 2; }
+    .qr {
       left: 0;
-      transform: none;
-      bottom: 100%;
+      top: calc(100% + 0.5rem);
+      transform: translateY(-10px);
     }
-    
-    .qr-popup::after, .qr-popup::before {
-      left: 20px;
-    }
+    .profile__link.wechat:hover .qr { transform: translateY(0); }
+    .focus-list li { grid-template-columns: 80px 1fr; row-gap: 0.25rem; }
+    .focus-list__note { grid-column: 1 / -1; }
   }
 </style>

@@ -17,9 +17,12 @@ const { post } = Astro.props;
 const { Content, headings } = await post.render();
 
 const { title, description, pubDate, updatedDate, category, tags, cover } = post.data;
-const categoryConfig = SITE_CONFIG.categories[category];
-
+const cat = SITE_CONFIG.categories[category];
 const { prev, next } = await getAdjacentPosts(post.slug);
+
+const dateMono = new Date(pubDate).toLocaleDateString('en-US', {
+  month: 'long', day: 'numeric', year: 'numeric'
+}).toUpperCase();
 ---
 
 <BaseLayout
@@ -33,190 +36,141 @@ const { prev, next } = await getAdjacentPosts(post.slug);
   currentCategory={category}
   headings={headings}
 >
-  <div class="article-container">
-    <article class="post">
-      <header class="post-header">
-        <div class="post-meta">
-          <a href={`/category/${category}`} class="category-tag">
-            {categoryConfig.displayName}
-          </a>
-          <time datetime={pubDate.toISOString()}>
-            {formatDate(pubDate)}
-          </time>
-        </div>
-        
-        <h1 class="post-title">{title}</h1>
-        <p class="post-description">{description}</p>
-        
-        {tags && tags.length > 0 && (
-          <div class="post-tags">
-            {tags.map(tag => (
-              <a href={`/tags/${tag}`} class="tag">
-                #{tag}
-              </a>
-            ))}
-          </div>
-        )}
-        
-        {cover && (
-          <img src={cover} alt={title} class="post-cover">
-        )}
-      </header>
-      
-      <div class="post-content">
-        <Content />
-        
-        {updatedDate && (
-          <div class="post-updated">
-            最后更新：{formatDate(updatedDate)}
-          </div>
-        )}
+  <article class="article">
+    <header class="article__head">
+      <div class="article__meta">
+        <a class="article__cat" href={`/category/${category}`}>[ {cat.displayName.toUpperCase()} · {cat.name.toUpperCase()} ]</a>
+        <span class="article__dot">·</span>
+        <time class="article__date" datetime={pubDate.toISOString()}>{dateMono}</time>
       </div>
-      
-      <Pagination
-        prev={prev ? { title: prev.data.title, url: `/blog/${prev.slug}` } : undefined}
-        next={next ? { title: next.data.title, url: `/blog/${next.slug}` } : undefined}
-      />
-    </article>
-  </div>
+
+      <h1 class="article__title">{title}</h1>
+      <p class="article__lede">{description}</p>
+
+      {tags && tags.length > 0 && (
+        <div class="article__tags">
+          {tags.map(tag => (
+            <a href={`/tags/${tag}`} class="article__tag">#{tag}</a>
+          ))}
+        </div>
+      )}
+
+      <div class="article__rule"></div>
+
+      {cover && (
+        <div class="article__cover">
+          <img src={cover} alt={title} />
+        </div>
+      )}
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    {updatedDate && (
+      <p class="article__updated">
+        <span class="bracket-label">UPDATED</span>
+        <span>{formatDate(updatedDate)}</span>
+      </p>
+    )}
+
+    <Pagination
+      prev={prev ? { title: prev.data.title, url: `/blog/${prev.slug}` } : undefined}
+      next={next ? { title: next.data.title, url: `/blog/${next.slug}` } : undefined}
+    />
+  </article>
 </BaseLayout>
 
 <style>
-  /* 限制文章内容的最大宽度，保证阅读体验，但靠左对齐 */
-  .article-container {
-    max-width: 900px; /* 文章正文不宜过宽 */
-    margin: 0; 
-    width: 100%;
+  .article {
+    max-width: var(--article-max);
+    margin: 0;
   }
 
-  /* 让整个文章区域都响应字号设置 */
-  .post {
-    font-size: var(--article-font-size);
-    line-height: 1.8;
-  }
+  .article__head { margin-bottom: var(--s-8); }
 
-  .post-header {
-    margin-bottom: var(--spacing-xl);
-    text-align: left;
-  }
-  
-  .post-meta {
+  .article__meta {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    gap: var(--spacing-sm);
-    font-size: 0.9rem;
-    color: var(--color-text-secondary);
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    color: var(--text-muted);
+    margin-bottom: 1.4rem;
     font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: var(--spacing-md);
   }
-  
-  .category-tag {
-    color: var(--color-primary);
-    text-decoration: none;
-    font-weight: 600;
+  .article__cat { color: var(--text-dim); transition: color var(--dur-fast) var(--ease-soft); }
+  .article__cat:hover { color: var(--text); }
+  .article__dot { color: var(--text-faint); }
+
+  .article__title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    margin-bottom: 1.1rem;
+    color: var(--text);
   }
-  
-  .post-title {
-    font-size: 2.5em; /* 相对于正文字号的倍数 */
-    line-height: 1.2;
-    margin-bottom: var(--spacing-md);
-    font-family: var(--font-heading);
-    letter-spacing: -0.02em;
-    font-weight: 700;
-  }
-  
-  .post-description {
-    font-size: 1.2em; /* 相对于正文字号的倍数 */
-    color: var(--color-text-secondary);
-    margin-bottom: var(--spacing-lg);
+
+  .article__lede {
+    font-family: var(--font-cn);
+    color: var(--text-dim);
+    font-size: 1.05rem;
     line-height: 1.6;
-    font-family: var(--font-heading);
-    font-style: italic;
+    max-width: 56ch;
+    margin-bottom: 1.4rem;
   }
-  
-  .post-tags {
+
+  .article__tags {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
+    gap: 0.5rem;
+    margin-bottom: 1.6rem;
   }
-  
-  .tag {
-    color: var(--color-text-secondary);
-    font-size: 0.85rem;
-    font-family: var(--font-mono);
-    background-color: var(--color-bg-secondary);
-    padding: 0.2em 0.5em;
-    border-radius: var(--radius-sm);
+  .article__tag {
+    font-family: var(--font-cn);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    padding: 0.18rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    transition: border-color var(--dur-fast) var(--ease-soft), color var(--dur-fast) var(--ease-soft);
   }
-  
-  .tag:hover {
-    color: var(--color-primary);
-    background-color: var(--color-border);
+  .article__tag:hover { border-color: var(--border-strong); color: var(--text); }
+
+  .article__rule {
+    height: 1px;
+    background: linear-gradient(90deg, var(--border-strong), transparent);
+    margin: var(--s-5) 0 var(--s-6);
   }
-  
-  .post-cover {
+
+  .article__cover {
+    margin-bottom: var(--s-6);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .article__cover img {
     width: 100%;
-    aspect-ratio: 21 / 9; /* 更宽的比例 */
+    aspect-ratio: 21 / 9;
     object-fit: cover;
-    border-radius: var(--radius-sm);
-    margin-top: var(--spacing-lg);
   }
-  
-  .post-content {
-    /* 移除 font-size 设置，因为它现在继承自 .post */
-    /* font-size: var(--article-font-size); */ 
-    line-height: 1.8;
+
+  .article__updated {
+    margin-top: var(--s-8);
+    padding: 1rem 1.2rem;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    font-family: var(--font-cn);
+    font-size: 0.86rem;
   }
-  
-  .post-content :global(h2) {
-    margin-top: var(--spacing-xl);
-    margin-bottom: var(--spacing-md);
-    padding-bottom: 0;
-    border-bottom: none;
-    font-size: 2rem;
-    font-weight: 700;
-  }
-  
-  .post-content :global(h3) {
-    margin-top: var(--spacing-lg);
-    margin-bottom: var(--spacing-sm);
-    font-size: 1.5rem;
-    font-weight: 700;
-  }
-  
-  .post-content :global(p) {
-    margin-bottom: 1.5em;
-  }
-  
-  .post-content :global(img) {
-    margin: var(--spacing-lg) 0;
-    border-radius: var(--radius-sm);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* 轻微阴影 */
-    width: 100%;
-  }
-  
-  .post-updated {
-    margin-top: var(--spacing-xl);
-    padding: var(--spacing-md);
-    background-color: var(--color-bg-secondary);
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
-    text-align: left; /* 改为左对齐 */
-    font-family: var(--font-mono);
-  }
-  
-  @media (max-width: 768px) {
-    .post-title {
-      font-size: 2.25rem;
-    }
-    
-    .post-description {
-      font-size: 1.1rem;
-    }
-  }
+
+  /* Tighter prose width on desktop is already governed by parent */
 </style>

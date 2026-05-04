@@ -5,65 +5,85 @@ import { SITE_CONFIG } from '@/config';
 const projects = [
   {
     name: '星煜凡程',
-    desc: '个人长期目标管理与追踪平台，记录成长轨迹',
+    en:   'Star Goals',
+    desc: '个人长期目标管理与追踪平台，记录成长轨迹。',
+    tagline: 'Long-term goals · life tracker',
     url: 'https://goals.wyhef.cloud',
     github: 'https://github.com/WYHEF/long-term-goals',
-    tech: ['Web', '全栈'],
-    icon: '🎯',
+    tech: ['Web', 'Full-stack', 'TypeScript']
   },
   {
     name: 'KMP 算法可视化',
-    desc: 'KMP 字符串匹配算法的交互式可视化演示页面',
+    en:   'KMP Visualizer',
+    desc: 'KMP 字符串匹配算法的交互式可视化演示页面。',
+    tagline: 'Interactive algorithm demo',
     url: 'https://kmp.wyhef.cloud',
     github: 'https://github.com/WYHEF/kmp',
-    tech: ['算法', '可视化', '前端'],
-    icon: '🔍',
+    tech: ['Algorithm', 'Visualization', 'Front-end']
   },
   {
     name: '个人博客',
-    desc: '基于 Astro 构建的静态博客，记录技术、学习和生活',
+    en:   'Personal Blog',
+    desc: '基于 Astro 构建的静态博客，记录技术、学习和生活。',
+    tagline: 'A field log · this site',
     url: 'https://www.wyhef.cloud',
     github: 'https://github.com/WYHEF/my-blog',
-    tech: ['Astro', 'TypeScript', 'SSG'],
-    icon: '✍️',
-  },
+    tech: ['Astro', 'TypeScript', 'SSG']
+  }
 ];
 ---
 
 <BaseLayout
-  title={`成品项目 - ${SITE_CONFIG.title}`}
+  title={`成品项目 · PROJECTS — ${SITE_CONFIG.title}`}
   description={`${SITE_CONFIG.author}的个人项目展示`}
 >
-  <div class="projects-container">
-    <header class="projects-header">
-      <h1>成品项目</h1>
-      <p class="projects-desc">
-        这里记录了我独立完成的一些项目，每个项目都是一段学习与实践的经历。
+  <div class="projects shell">
+    <header class="projects__head" data-reveal>
+      <span class="bracket-label">PROJECTS</span>
+      <h1 class="projects__title">
+        Things I've built<br/>
+        <span class="projects__title-cn">独立完成的一些项目</span>
+      </h1>
+      <p class="projects__lede">
+        每个项目都是一段学习与实践的经历 — A small atlas of side-projects, ordered by what I learnt building them.
       </p>
     </header>
 
-    <div class="projects-grid">
-      {projects.map((project) => (
-        <article class="project-card">
-          <div class="project-icon">{project.icon}</div>
-          <div class="project-content">
-            <h2 class="project-name">{project.name}</h2>
-            <p class="project-desc">{project.desc}</p>
-            <div class="project-tech">
-              {project.tech.map((t) => (
-                <span class="tech-tag">{t}</span>
-              ))}
-            </div>
-            <div class="project-links">
-              <a href={project.url} target="_blank" rel="noopener noreferrer" class="project-link live">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                在线访问
-              </a>
-              <a href={project.github} target="_blank" rel="noopener noreferrer" class="project-link github">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
-                源码
-              </a>
-            </div>
+    <div class="projects__grid">
+      {projects.map((p, i) => (
+        <article class="project" data-reveal data-tilt data-tilt-max="6" style={`--reveal-delay: ${i * 100}ms;`}>
+          <div class="project__head">
+            <span class="bracket-label">PROJECT · 0{i + 1}</span>
+            <span class="project__lede">{p.tagline}</span>
+          </div>
+
+          <div class="project__title-row">
+            <h2 class="project__name">{p.name}</h2>
+            <span class="project__en">{p.en}</span>
+          </div>
+
+          <p class="project__desc">{p.desc}</p>
+
+          <ul class="project__tech">
+            {p.tech.map(t => <li>{t}</li>)}
+          </ul>
+
+          <div class="project__sketch" aria-hidden="true">
+            <svg viewBox="0 0 320 80" preserveAspectRatio="none" width="100%" height="80" stroke="currentColor" fill="none" stroke-width="0.6">
+              <line x1="0"   y1="40" x2="320" y2="40"/>
+              <line x1="0"   y1="60" x2="320" y2="60" opacity="0.4"/>
+              <line x1="0"   y1="20" x2="320" y2="20" opacity="0.4"/>
+              <line x1="40"  y1="0"  x2="40"  y2="80" opacity="0.25"/>
+              <line x1="120" y1="0"  x2="120" y2="80" opacity="0.25"/>
+              <line x1="200" y1="0"  x2="200" y2="80" opacity="0.25"/>
+              <line x1="280" y1="0"  x2="280" y2="80" opacity="0.25"/>
+              <circle cx={40 + (i * 80)} cy="40" r="3" fill="currentColor"/>
+            </svg>
+          </div>
+
+          <div class="project__cta">
+            <a class="pill" href={p.url} target="_blank" rel="noopener">VISIT <span class="arrow">↗</span></a>
+            <a class="pill pill--ghost" href={p.github} target="_blank" rel="noopener">GITHUB <span class="arrow">↗</span></a>
           </div>
         </article>
       ))}
@@ -72,141 +92,127 @@ const projects = [
 </BaseLayout>
 
 <style>
-  .projects-container {
-    max-width: 1000px;
-    margin: 0;
-    padding-right: var(--spacing-lg);
+  .projects { padding-block: var(--s-10) var(--s-14); }
+
+  .projects__head { margin-bottom: var(--s-10); max-width: 800px; }
+  .projects__title {
+    margin-top: 1rem;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2rem, 4.5vw, 3.4rem);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .projects__title-cn {
+    font-family: var(--font-cn);
+    color: var(--text-dim);
+    font-size: 0.6em;
+  }
+  .projects__lede {
+    margin-top: 1rem;
+    color: var(--text-dim);
+    font-family: var(--font-cn);
+    font-size: 1rem;
+    line-height: 1.65;
+    max-width: 64ch;
   }
 
-  .projects-header {
-    margin-bottom: var(--spacing-xl);
+  .projects__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.4rem;
   }
+  @media (max-width: 1000px) { .projects__grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 640px)  { .projects__grid { grid-template-columns: 1fr; } }
 
-  .projects-header h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    font-family: var(--font-heading);
-    margin-bottom: var(--spacing-md);
-    color: var(--color-text);
-  }
-
-  .projects-desc {
-    font-size: 1.1rem;
-    color: var(--color-text-secondary);
-    line-height: 1.6;
-  }
-
-  .projects-grid {
+  .project {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg);
+    gap: 1rem;
+    padding: 1.6rem 1.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    transition:
+      border-color var(--dur) var(--ease-soft),
+      background var(--dur) var(--ease-soft),
+      transform var(--dur) var(--ease-soft);
   }
-
-  .project-card {
-    display: flex;
-    gap: var(--spacing-lg);
-    padding: var(--spacing-lg);
-    background-color: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .project-card:hover {
+  .project:hover {
+    border-color: var(--border-strong);
+    background: var(--bg-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
-  .project-icon {
-    font-size: 2.5rem;
-    flex-shrink: 0;
-    width: 60px;
-    height: 60px;
+  .project__head {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    background-color: var(--color-bg);
-    border-radius: var(--radius-md);
+    gap: 1rem;
+  }
+  .project__lede {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    color: var(--text-faint);
+    text-transform: uppercase;
   }
 
-  .project-content {
-    flex: 1;
-    min-width: 0;
+  .project__title-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .project__name {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--text);
+    letter-spacing: -0.015em;
+  }
+  .project__en {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-muted);
   }
 
-  .project-name {
-    font-size: 1.4rem;
-    font-weight: 700;
-    font-family: var(--font-heading);
-    margin-bottom: var(--spacing-xs);
-    color: var(--color-text);
-  }
-
-  .project-desc {
-    font-size: 0.95rem;
-    color: var(--color-text-secondary);
+  .project__desc {
+    color: var(--text-dim);
+    font-family: var(--font-cn);
+    font-size: 0.92rem;
     line-height: 1.6;
-    margin-bottom: var(--spacing-md);
   }
 
-  .project-tech {
+  .project__tech {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
-  }
-
-  .tech-tag {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--color-text-secondary);
-    background-color: var(--color-bg);
-    padding: 0.2em 0.6em;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border);
-  }
-
-  .project-links {
-    display: flex;
-    gap: var(--spacing-md);
-  }
-
-  .project-link {
-    display: inline-flex;
-    align-items: center;
     gap: 0.4rem;
-    font-size: 0.9rem;
-    color: var(--color-text-secondary);
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: all 0.2s ease;
+  }
+  .project__tech li {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 0.18rem 0.55rem;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
   }
 
-  .project-link:hover {
-    color: var(--color-primary);
-    border-bottom-color: var(--color-primary);
+  .project__sketch {
+    color: var(--text-faint);
+    margin-top: auto;
+    transition: color var(--dur) var(--ease-soft);
   }
+  .project:hover .project__sketch { color: var(--text-dim); }
 
-  .project-link svg {
-    opacity: 0.7;
-  }
-
-  .project-link:hover svg {
-    opacity: 1;
-  }
-
-  @media (max-width: 768px) {
-    .projects-header h1 {
-      font-size: 2rem;
-    }
-
-    .project-card {
-      flex-direction: column;
-      gap: var(--spacing-md);
-    }
-
-    .projects-container {
-      padding-right: 0;
-    }
+  .project__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 </style>

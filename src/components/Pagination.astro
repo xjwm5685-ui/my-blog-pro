@@ -57,7 +57,7 @@ const { prev, next } = Astro.props;
       border-color var(--dur) var(--ease-soft),
       background var(--dur) var(--ease-soft),
       transform var(--dur) var(--ease-soft);
-    overflow: hidden;
+    overflow: visible;
     isolation: isolate;
   }
   .pg__link::before {
@@ -69,7 +69,11 @@ const { prev, next } = Astro.props;
     transition: opacity var(--dur) var(--ease-soft);
     z-index: 0;
   }
-  .pg__link > * { position: relative; z-index: 1; }
+  .pg__copy,
+  .pg__arrow {
+    position: relative;
+    z-index: 1;
+  }
 
   .pg__link:hover {
     border-color: var(--border-strong);
@@ -120,14 +124,33 @@ const { prev, next } = Astro.props;
 
   .pg__corner {
     position: absolute;
+    display: block;
+    z-index: 2;
     width: 8px;
     height: 8px;
     border: 0 solid var(--text);
     opacity: 0;
+    pointer-events: none;
     transition: opacity var(--dur) var(--ease-soft);
   }
-  .pg__corner--tl { top: 5px; left: 5px;  border-top-width: 1px; border-left-width: 1px; }
-  .pg__corner--bl { bottom: 5px; left: 5px;  border-bottom-width: 1px; border-left-width: 1px; }
+  .pg__link--prev .pg__corner {
+    width: 14px;
+    height: 14px;
+  }
+  .pg__corner--tl {
+    top: 0;
+    left: 0;
+    transform: translate(-1px, -1px);
+    border-top-width: 1px;
+    border-left-width: 1px;
+  }
+  .pg__corner--bl {
+    bottom: 0;
+    left: 0;
+    transform: translate(-1px, 1px);
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+  }
   .pg__corner--tr { top: 5px; right: 5px;  border-top-width: 1px; border-right-width: 1px; }
   .pg__corner--br { bottom: 5px; right: 5px;  border-bottom-width: 1px; border-right-width: 1px; }
   .pg__link:hover .pg__corner { opacity: 0.5; }

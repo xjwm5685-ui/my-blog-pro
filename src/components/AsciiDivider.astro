@@ -1,0 +1,109 @@
+---
+/**
+ * AsciiDivider — animated horizontal band of mono characters that
+ * randomly resolve. Sits between major sections.
+ *
+ * Props:
+ *   density: number   length of the strip (default 64)
+ *   speed:   ms per cycle (default 90)
+ *   id:      stable id for resume
+ */
+interface Props {
+  density?: number;
+  speed?: number;
+  id?: string;
+}
+const {
+  density = 84,
+  speed = 90,
+  id = `ad-${Math.random().toString(36).slice(2, 8)}`
+} = Astro.props;
+
+// Pre-fill with a static glyph so SSR isn't blank
+const seed = '·';
+const initial = seed.repeat(density);
+---
+<div class="ad" data-density={density} data-speed={speed} id={id} aria-hidden="true">
+  <span class="ad__edge ad__edge--l">┤</span>
+  <span class="ad__strip" data-ad-strip>{initial}</span>
+  <span class="ad__edge ad__edge--r">├</span>
+</div>
+
+<style>
+  .ad {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 1.2rem var(--shell-px);
+    overflow: hidden;
+    border-block: 1px solid var(--border);
+    background: linear-gradient(180deg, transparent, rgba(190, 210, 255, 0.02), transparent);
+  }
+  .ad__edge {
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.32em;
+  }
+  .ad__strip {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    color: var(--text-muted);
+    text-shadow: 0 0 8px rgba(190, 210, 255, 0.18);
+    user-select: none;
+  }
+  @media (max-width: 720px) {
+    .ad { padding-block: 0.8rem; }
+    .ad__strip { font-size: 0.68rem; letter-spacing: 0.12em; }
+  }
+</style>
+
+<script>
+  const GLYPHS = '╌─·•◦∙—-=+/\\<>[](){}╳╱╲╴╶╵╷ ';
+
+  function bootDividers() {
+    document.querySelectorAll<HTMLElement>('.ad').forEach((root) => {
+      if ((root as any).__ad) return;
+      (root as any).__ad = true;
+      const strip = root.querySelector<HTMLElement>('[data-ad-strip]');
+      if (!strip) return;
+      const density = Number(root.dataset.density || 60);
+      const speed   = Number(root.dataset.speed   || 90);
+      let chars: string[] = new Array(density).fill('·');
+
+      const fill = () => {
+        // mutate ~12% of chars per tick
+        const n = Math.max(1, Math.floor(density * 0.12));
+        for (let i = 0; i < n; i++) {
+          const idx = Math.floor(Math.random() * density);
+          chars[idx] = GLYPHS.charAt(Math.floor(Math.random() * GLYPHS.length));
+        }
+        strip.textContent = chars.join('');
+      };
+
+      let id: number | undefined;
+      let visible = true;
+      const start = () => { if (id == null) id = window.setInterval(fill, speed); };
+      const stop  = () => { if (id != null) { window.clearInterval(id); id = undefined; } };
+
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          visible = e.isIntersecting;
+          visible ? start() : stop();
+        }
+      }, { threshold: 0.05 });
+      io.observe(root);
+
+      document.addEventListener('astro:before-swap', () => { stop(); io.disconnect(); }, { once: true });
+    });
+  }
+  bootDividers();
+  document.addEventListener('astro:page-load', bootDividers);
+</script>

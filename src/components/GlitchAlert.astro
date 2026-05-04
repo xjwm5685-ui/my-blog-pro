@@ -1,0 +1,110 @@
+---
+/**
+ * GlitchAlert — very small HUD warning that randomly flashes once
+ * every 30-90 seconds. Decorative atmospherics.
+ */
+---
+<div class="ga" data-ga aria-hidden="true">
+  <span class="ga__dot"></span>
+  <span class="ga__text" data-ga-text>SIGNAL · OK</span>
+</div>
+
+<style>
+  .ga {
+    position: fixed;
+    left: var(--shell-px);
+    bottom: 1.4rem;
+    z-index: 945;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.8rem;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: gaFadeIn 900ms var(--ease-out) 2.2s forwards;
+    transition:
+      color 200ms ease,
+      border-color 200ms ease,
+      background 200ms ease;
+  }
+  @keyframes gaFadeIn { to { opacity: 1; transform: translateY(0); } }
+
+  .ga.is-glitch {
+    color: #ff5d6e;
+    border-color: rgba(255, 93, 110, 0.55);
+    background: rgba(60, 0, 8, 0.55);
+    animation: gaShake 380ms steps(8) 1;
+  }
+  .ga.is-glitch .ga__dot {
+    background: #ff5d6e;
+    box-shadow: 0 0 10px rgba(255, 93, 110, 0.95);
+  }
+
+  .ga__dot {
+    width: 5px; height: 5px;
+    background: #6ee7a8;
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(110, 231, 168, 0.7);
+    transition: background 200ms ease, box-shadow 200ms ease;
+  }
+
+  @keyframes gaShake {
+    0%   { transform: translate(0, 0); }
+    20%  { transform: translate(-2px, 1px); }
+    40%  { transform: translate(2px, -1px); }
+    60%  { transform: translate(-1px, 2px); }
+    80%  { transform: translate(1px, -2px); }
+    100% { transform: translate(0, 0); }
+  }
+
+  @media (max-width: 720px) {
+    .ga { display: none; }
+  }
+</style>
+
+<script>
+  function bootGlitch() {
+    const root = document.querySelector<HTMLElement>('[data-ga]');
+    const text = document.querySelector<HTMLElement>('[data-ga-text]');
+    if (!root || !text) return;
+    const messages = [
+      'GLITCH · 0x42',
+      'COSMIC RAY · TRACE',
+      'PHOTON DRIFT',
+      'CACHE · MISS',
+      'BEAM · DIM',
+      'NEBULA · ACK',
+      'PARALLAX · OK'
+    ];
+    const restful = ['SIGNAL · OK', 'STREAM · STABLE', 'FIELD · ACTIVE'];
+
+    let timer = 0;
+    const schedule = () => {
+      const wait = 28000 + Math.random() * 52000;
+      timer = window.setTimeout(() => {
+        text.textContent = messages[Math.floor(Math.random() * messages.length)];
+        root.classList.add('is-glitch');
+        window.setTimeout(() => {
+          root.classList.remove('is-glitch');
+          text.textContent = restful[Math.floor(Math.random() * restful.length)];
+        }, 1400);
+        schedule();
+      }, wait);
+    };
+    schedule();
+    document.addEventListener('astro:before-swap', () => window.clearTimeout(timer), { once: true });
+  }
+  bootGlitch();
+  document.addEventListener('astro:page-load', bootGlitch);
+</script>

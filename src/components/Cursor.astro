@@ -1,0 +1,162 @@
+---
+/**
+ * Cursor — custom mouse cursor with a lerping ring + instant dot.
+ * Expands over interactive elements, contracts on press, hides on touch.
+ */
+---
+<div class="cur" aria-hidden="true">
+  <span class="cur__ring" data-cur-ring></span>
+  <span class="cur__dot"  data-cur-dot></span>
+  {Array.from({ length: 8 }).map((_, i) => (
+    <span class="cur__trail" data-cur-trail style={`--ti: ${i};`}></span>
+  ))}
+</div>
+
+<style>
+  /* Hide default cursor only on devices that have a real pointer */
+  @media (hover: hover) and (pointer: fine) {
+    html, body { cursor: none !important; }
+    a, button, input, textarea, label, [role="button"], .pill, .row, .card { cursor: none !important; }
+    input, textarea { caret-color: var(--text); }
+  }
+
+  .cur {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    display: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .cur { display: block; }
+  }
+
+  .cur__ring,
+  .cur__dot,
+  .cur__trail {
+    position: absolute;
+    top: 0; left: 0;
+    border-radius: 50%;
+    will-change: transform, width, height, opacity;
+    pointer-events: none;
+  }
+
+  .cur__trail {
+    width: calc(8px - (var(--ti) * 0.7px));
+    height: calc(8px - (var(--ti) * 0.7px));
+    background: rgba(190, 210, 255, calc(0.55 - var(--ti) * 0.06));
+    box-shadow: 0 0 6px rgba(190, 210, 255, calc(0.45 - var(--ti) * 0.05));
+    transform: translate3d(-50%, -50%, 0);
+    mix-blend-mode: screen;
+  }
+
+  .cur__ring {
+    width: 28px; height: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    transform: translate3d(-50%, -50%, 0);
+    transition:
+      width 240ms var(--ease-soft),
+      height 240ms var(--ease-soft),
+      border-color 200ms var(--ease-soft),
+      background-color 200ms var(--ease-soft),
+      opacity 200ms var(--ease-soft);
+    backdrop-filter: invert(0.05) blur(0.5px);
+  }
+  .cur__dot {
+    width: 4px; height: 4px;
+    background: #fff;
+    transform: translate3d(-50%, -50%, 0);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+  }
+
+  /* states */
+  .cur.is-hover .cur__ring {
+    width: 56px; height: 56px;
+    border-color: rgba(190, 210, 255, 0.85);
+    background: rgba(190, 210, 255, 0.06);
+  }
+  .cur.is-down .cur__ring {
+    width: 22px; height: 22px;
+    border-color: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .cur.is-text .cur__ring {
+    width: 4px; height: 32px;
+    border-radius: 2px;
+    border-color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.85);
+  }
+  .cur.is-text .cur__dot { opacity: 0; }
+  .cur.is-hidden { opacity: 0; }
+</style>
+
+<script>
+  function bootCursor() {
+    if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    const root = document.querySelector<HTMLElement>('.cur');
+    const ring = document.querySelector<HTMLElement>('[data-cur-ring]');
+    const dot  = document.querySelector<HTMLElement>('[data-cur-dot]');
+    const trails = Array.from(document.querySelectorAll<HTMLElement>('[data-cur-trail]'));
+    if (!root || !ring || !dot) return;
+
+    let mx = window.innerWidth / 2;
+    let my = window.innerHeight / 2;
+    let rx = mx, ry = my;
+    // each trail dot has its own lerp position
+    const trailPos = trails.map(() => ({ x: mx, y: my }));
+    let raf = 0;
+
+    const tick = () => {
+      rx += (mx - rx) * 0.22;
+      ry += (my - ry) * 0.22;
+      ring.style.transform = `translate3d(${rx}px, ${ry}px, 0) translate(-50%, -50%)`;
+      dot.style.transform  = `translate3d(${mx}px, ${my}px, 0) translate(-50%, -50%)`;
+
+      // each trail dot chases the previous one with progressively tighter lerp
+      let prevX = mx, prevY = my;
+      for (let i = 0; i < trails.length; i++) {
+        const t = trailPos[i];
+        const factor = 0.32 - i * 0.025;            // 0.32, 0.295, ... ~0.14
+        t.x += (prevX - t.x) * Math.max(0.08, factor);
+        t.y += (prevY - t.y) * Math.max(0.08, factor);
+        trails[i].style.transform =
+          `translate3d(${t.x}px, ${t.y}px, 0) translate(-50%, -50%)`;
+        prevX = t.x; prevY = t.y;
+      }
+
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    const onMove = (e: MouseEvent) => {
+      mx = e.clientX; my = e.clientY;
+      root.classList.remove('is-hidden');
+    };
+    const onLeave = () => root.classList.add('is-hidden');
+    const onDown  = () => root.classList.add('is-down');
+    const onUp    = () => root.classList.remove('is-down');
+
+    const HOVER_SEL = 'a, button, [role="button"], .pill, .row, .card, .card-stage, [data-tilt], input[type="submit"]';
+    const TEXT_SEL  = 'input[type="text"], input[type="search"], textarea, [contenteditable]';
+
+    const onOver = (e: Event) => {
+      const t = e.target as HTMLElement;
+      if (!(t instanceof HTMLElement)) return;
+      if (t.closest(TEXT_SEL))      { root.classList.add('is-text');  root.classList.remove('is-hover'); return; }
+      if (t.closest(HOVER_SEL))     { root.classList.add('is-hover'); root.classList.remove('is-text');  return; }
+      root.classList.remove('is-hover'); root.classList.remove('is-text');
+    };
+
+    window.addEventListener('mousemove', onMove, { passive: true });
+    window.addEventListener('mouseout', onLeave);
+    window.addEventListener('mousedown', onDown);
+    window.addEventListener('mouseup', onUp);
+    document.addEventListener('mouseover', onOver);
+
+    document.addEventListener('astro:before-swap', () => {
+      cancelAnimationFrame(raf);
+    }, { once: true });
+  }
+  bootCursor();
+  document.addEventListener('astro:page-load', bootCursor);
+</script>

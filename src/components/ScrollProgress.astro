@@ -1,0 +1,73 @@
+---
+/**
+ * ScrollProgress — luminous beam at the top of the viewport that fills
+ * left-to-right as the user scrolls the page. Tied to scroll position
+ * via requestAnimationFrame.
+ */
+---
+<div class="sp" aria-hidden="true">
+  <span class="sp__bar" data-sp-bar></span>
+  <span class="sp__head" data-sp-head></span>
+</div>
+
+<style>
+  .sp {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    z-index: 1100;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.04));
+  }
+  .sp__bar {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg,
+      rgba(190, 210, 255, 0.85),
+      rgba(255, 255, 255, 1) 60%,
+      rgba(255, 240, 220, 0.85));
+    box-shadow:
+      0 0 12px rgba(190, 210, 255, 0.7),
+      0 0 28px rgba(190, 210, 255, 0.35);
+    transform-origin: left;
+    will-change: width;
+  }
+  .sp__head {
+    position: absolute;
+    top: -3px;
+    left: 0;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow:
+      0 0 16px rgba(255, 255, 255, 0.9),
+      0 0 32px rgba(190, 210, 255, 0.6);
+    transform: translateX(-4px);
+    will-change: transform;
+  }
+</style>
+
+<script>
+  function bootSP() {
+    const bar  = document.querySelector<HTMLElement>('[data-sp-bar]');
+    const head = document.querySelector<HTMLElement>('[data-sp-head]');
+    if (!bar || !head) return;
+
+    let raf = 0;
+    const update = () => {
+      const max = (document.documentElement.scrollHeight - window.innerHeight) || 1;
+      const pct = Math.min(100, Math.max(0, (window.scrollY / max) * 100));
+      bar.style.width  = pct.toFixed(2) + '%';
+      head.style.transform = `translateX(calc(${pct.toFixed(2)}vw - 4px))`;
+      raf = 0;
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    update();
+  }
+  bootSP();
+  document.addEventListener('astro:page-load', bootSP);
+</script>

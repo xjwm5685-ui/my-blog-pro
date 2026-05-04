@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import Pagination from '@components/Pagination.astro';
+import ReadingProgress from '@components/ReadingProgress.astro';
 import { formatDate, getAdjacentPosts } from '@/utils/post';
 import { SITE_CONFIG } from '@/config';
 
@@ -36,7 +37,9 @@ const dateMono = new Date(pubDate).toLocaleDateString('en-US', {
   currentCategory={category}
   headings={headings}
 >
-  <article class="article">
+  <ReadingProgress />
+
+  <article class="article" data-section-name={`[ READING · ${cat.displayName.toUpperCase()} ]`}>
     <header class="article__head">
       <div class="article__meta">
         <a class="article__cat" href={`/category/${category}`}>[ {cat.displayName.toUpperCase()} · {cat.name.toUpperCase()} ]</a>
@@ -58,13 +61,15 @@ const dateMono = new Date(pubDate).toLocaleDateString('en-US', {
       <div class="article__rule"></div>
 
       {cover && (
-        <div class="article__cover">
+        <div class="article__cover" data-cover-reveal>
           <img src={cover} alt={title} />
+          <span class="article__cover-mask" aria-hidden="true"></span>
+          <span class="article__cover-beam" aria-hidden="true"></span>
         </div>
       )}
     </header>
 
-    <div class="prose">
+    <div class="prose" data-prose data-paragraph-reveal>
       <Content />
     </div>
 
@@ -84,8 +89,9 @@ const dateMono = new Date(pubDate).toLocaleDateString('en-US', {
 
 <style>
   .article {
+    width: min(100%, var(--article-max));
     max-width: var(--article-max);
-    margin: 0;
+    margin: 0 auto;
   }
 
   .article__head { margin-bottom: var(--s-8); }
@@ -149,14 +155,60 @@ const dateMono = new Date(pubDate).toLocaleDateString('en-US', {
   }
 
   .article__cover {
+    position: relative;
     margin-bottom: var(--s-6);
     border: 1px solid var(--border);
     overflow: hidden;
+    isolation: isolate;
   }
   .article__cover img {
     width: 100%;
     aspect-ratio: 21 / 9;
     object-fit: cover;
+    transform: scale(1.04);
+    filter: brightness(0.55) saturate(0.9);
+    transition: transform 1400ms var(--ease-out), filter 1400ms var(--ease-out);
+  }
+  .article__cover-mask {
+    position: absolute;
+    inset: 0;
+    background: #000;
+    transform-origin: right;
+    transform: scaleX(1);
+    transition: transform 1100ms cubic-bezier(0.86, 0, 0.07, 1);
+    z-index: 2;
+  }
+  .article__cover-beam {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 80px;
+    left: -120px;
+    background: linear-gradient(90deg,
+      transparent,
+      rgba(190, 210, 255, 0.55) 40%,
+      rgba(255, 255, 255, 0.95) 50%,
+      rgba(190, 210, 255, 0.55) 60%,
+      transparent);
+    box-shadow: 0 0 60px rgba(190, 210, 255, 0.6);
+    z-index: 3;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .article__cover.is-revealed img {
+    transform: scale(1);
+    filter: brightness(0.92) saturate(1);
+  }
+  .article__cover.is-revealing .article__cover-mask {
+    transform: scaleX(0);
+  }
+  .article__cover.is-revealing .article__cover-beam {
+    animation: coverBeam 1100ms cubic-bezier(0.86, 0, 0.07, 1) forwards;
+  }
+  @keyframes coverBeam {
+    0%   { left: -120px; opacity: 0; }
+    20%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { left: 110%; opacity: 0; }
   }
 
   .article__updated {
@@ -172,5 +224,154 @@ const dateMono = new Date(pubDate).toLocaleDateString('en-US', {
     font-size: 0.86rem;
   }
 
+  /* Inline images get a 3D hover tilt + light-band edge */
+  .prose :global(img) {
+    --img-rx: 0deg;
+    --img-ry: 0deg;
+    transform-origin: center;
+    transform: perspective(1200px) rotateX(var(--img-rx)) rotateY(var(--img-ry));
+    transition: transform 280ms var(--ease-soft), box-shadow 280ms var(--ease-soft);
+    will-change: transform;
+    cursor: zoom-in;
+  }
+  .prose :global(img:hover) {
+    box-shadow:
+      0 30px 60px -25px rgba(0, 0, 0, 0.85),
+      0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+      0 0 32px -4px rgba(190, 210, 255, 0.45);
+  }
+
+  /* Code blocks reveal with a typing scanline overlay until "typed" */
+  .prose :global(pre) {
+    position: relative;
+    overflow: hidden;
+  }
+  .prose :global(pre[data-code-typed]::after) {
+    content: '';
+    position: absolute;
+    inset: 0 var(--code-progress, 100%) 0 0;
+    background: var(--bg-elev);
+    pointer-events: none;
+    transition: inset 60ms linear;
+  }
+  .prose :global(pre[data-code-typed]::before) {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    left: calc(100% - var(--code-progress, 100%));
+    width: 1px;
+    background: linear-gradient(180deg,
+      rgba(190, 210, 255, 0),
+      rgba(190, 210, 255, 0.95) 50%,
+      rgba(190, 210, 255, 0));
+    box-shadow: 0 0 14px rgba(190, 210, 255, 0.85);
+    transition: left 60ms linear;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .prose :global(pre[data-code-typed].is-done::after),
+  .prose :global(pre[data-code-typed].is-done::before) {
+    display: none;
+  }
+
   /* Tighter prose width on desktop is already governed by parent */
 </style>
+
+<script>
+  /* Article-page interactions: cover reveal, paragraph reveal, image tilt,
+     code-block "typing" scan-in. */
+  function bootArticle() {
+    /* Cover beam reveal — trigger when cover scrolls into view */
+    document.querySelectorAll<HTMLElement>('[data-cover-reveal]').forEach((cov) => {
+      if ((cov as any).__cov) return;
+      (cov as any).__cov = true;
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          cov.classList.add('is-revealing');
+          window.setTimeout(() => cov.classList.add('is-revealed'), 1100);
+          io.unobserve(cov);
+        }
+      }, { threshold: 0.2 });
+      io.observe(cov);
+    });
+
+    /* Paragraph reveal — every direct child of [data-paragraph-reveal]
+       fades up as it enters view */
+    document.querySelectorAll<HTMLElement>('[data-paragraph-reveal]').forEach((root) => {
+      if ((root as any).__pr) return;
+      (root as any).__pr = true;
+      const children = Array.from(root.children) as HTMLElement[];
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            (e.target as HTMLElement).classList.add('is-in');
+            io.unobserve(e.target);
+          }
+        }
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+      children.forEach((c) => io.observe(c));
+    });
+
+    /* Inline image 3D hover tilt */
+    document.querySelectorAll<HTMLElement>('.prose img').forEach((img) => {
+      if ((img as any).__tilt) return;
+      (img as any).__tilt = true;
+      let raf = 0;
+      let tx = 0, ty = 0, cx = 0, cy = 0;
+      const max = 6;
+      const apply = () => {
+        cx += (tx - cx) * 0.18;
+        cy += (ty - cy) * 0.18;
+        img.style.setProperty('--img-rx', (cy *  max).toFixed(2) + 'deg');
+        img.style.setProperty('--img-ry', (cx * -max).toFixed(2) + 'deg');
+        if (Math.abs(tx - cx) + Math.abs(ty - cy) > 0.001) raf = requestAnimationFrame(apply);
+        else raf = 0;
+      };
+      img.addEventListener('mousemove', (e) => {
+        const r = img.getBoundingClientRect();
+        tx = ((e.clientX - r.left) / r.width)  * 2 - 1;
+        ty = ((e.clientY - r.top)  / r.height) * 2 - 1;
+        if (!raf) raf = requestAnimationFrame(apply);
+      });
+      img.addEventListener('mouseleave', () => {
+        tx = 0; ty = 0;
+        if (!raf) raf = requestAnimationFrame(apply);
+      });
+    });
+
+    /* Code-block typing scan — animates a vertical beam revealing the code */
+    document.querySelectorAll<HTMLElement>('.prose pre').forEach((pre) => {
+      if ((pre as any).__typed) return;
+      (pre as any).__typed = true;
+      const lines = (pre.textContent || '').split('\n').length;
+      // Skip very long code blocks — wouldn't be tasteful to animate 500 lines
+      if (lines > 220) return;
+
+      pre.setAttribute('data-code-typed', '1');
+      pre.style.setProperty('--code-progress', '100%');
+
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          // Animate progress from 100% (fully covered) → 0% (fully revealed)
+          const start = performance.now();
+          const dur = Math.min(2400, 600 + lines * 28);
+          const tick = (now: number) => {
+            const t = Math.min(1, (now - start) / dur);
+            const eased = 1 - Math.pow(1 - t, 3);
+            const cover = (1 - eased) * 100;
+            pre.style.setProperty('--code-progress', cover.toFixed(2) + '%');
+            if (t < 1) requestAnimationFrame(tick);
+            else pre.classList.add('is-done');
+          };
+          requestAnimationFrame(tick);
+          io.unobserve(pre);
+        }
+      }, { threshold: 0.15 });
+      io.observe(pre);
+    });
+  }
+  bootArticle();
+  document.addEventListener('astro:page-load', bootArticle);
+</script>

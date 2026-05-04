@@ -1,0 +1,66 @@
+---
+/**
+ * PulseRings — periodic luminous rings that emanate from screen center
+ * (or any anchor element). Pure CSS animations, layered for stacked
+ * polyrhythm. Ten rings staggered in time so the screen always has
+ * a slow heartbeat.
+ *
+ * Props:
+ *   anchor:   'center' | 'hero'  default 'center'
+ *   intensity: 0..1   default 1
+ */
+interface Props {
+  anchor?: 'center' | 'hero';
+  intensity?: number;
+}
+const { anchor = 'center', intensity = 1 } = Astro.props;
+---
+<div class:list={['pulse', `pulse--${anchor}`]} style={`--pulse-intensity: ${intensity};`} aria-hidden="true">
+  {Array.from({ length: 10 }).map((_, i) => (
+    <span class="pulse__ring" style={`--pi: ${i};`}></span>
+  ))}
+</div>
+
+<style>
+  .pulse {
+    position: fixed;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: var(--pulse-intensity, 1);
+  }
+  .pulse--hero {
+    position: absolute;
+    top: 55%; left: 50%;
+  }
+  .pulse__ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 60px; height: 60px;
+    border: 1px solid rgba(190, 210, 255, 0.55);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    box-shadow:
+      0 0 24px rgba(190, 210, 255, 0.30),
+      inset 0 0 24px rgba(190, 210, 255, 0.18);
+    opacity: 0;
+    animation: pulseRing 10s ease-out infinite;
+    animation-delay: calc(var(--pi) * -1s);
+  }
+  .pulse__ring:nth-child(3n)   { border-color: rgba(220, 180, 255, 0.45); }
+  .pulse__ring:nth-child(5n+2) { border-color: rgba(255, 210, 180, 0.45); }
+
+  @keyframes pulseRing {
+    0%   { transform: translate(-50%, -50%) scale(0);  opacity: 0; border-width: 2px; }
+    8%   { opacity: 0.85; }
+    100% { transform: translate(-50%, -50%) scale(40); opacity: 0; border-width: 0.4px; }
+  }
+
+  @media (max-width: 720px) {
+    .pulse__ring { animation-duration: 14s; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pulse__ring { animation: none; }
+  }
+</style>

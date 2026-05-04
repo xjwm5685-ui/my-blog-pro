@@ -1,0 +1,107 @@
+---
+/**
+ * ReadingProgress — slim vertical bar that fills as the user scrolls
+ * through an article. Sits at the left edge of the article column.
+ */
+---
+<div class="rp" data-rp aria-hidden="true">
+  <span class="rp__rail"></span>
+  <span class="rp__fill" data-rp-fill></span>
+  <span class="rp__head" data-rp-head></span>
+  <span class="rp__pct"  data-rp-pct>00%</span>
+</div>
+
+<style>
+  .rp {
+    position: fixed;
+    left: clamp(0.6rem, 2vw, 2rem);
+    top: calc(var(--nav-h) + 1rem);
+    bottom: 1rem;
+    width: 28px;
+    z-index: 850;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+  }
+  .rp__rail {
+    flex: 1;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--border) 8%, var(--border) 92%, transparent);
+  }
+  .rp__fill {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    background: linear-gradient(to bottom,
+      rgba(190, 210, 255, 0.85),
+      rgba(255, 255, 255, 0.95));
+    box-shadow: 0 0 10px rgba(190, 210, 255, 0.7);
+    height: 0%;
+    will-change: height;
+  }
+  .rp__head {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow:
+      0 0 14px rgba(255, 255, 255, 0.85),
+      0 0 28px rgba(190, 210, 255, 0.6);
+    transform: translateX(-50%) translateY(-50%);
+    will-change: top;
+  }
+  .rp__pct {
+    position: absolute;
+    left: 50%;
+    bottom: -2.2rem;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 1100px) {
+    .rp { display: none; }
+  }
+</style>
+
+<script>
+  function bootReadingProgress() {
+    const root = document.querySelector<HTMLElement>('[data-rp]');
+    if (!root) return;
+    const fill = root.querySelector<HTMLElement>('[data-rp-fill]');
+    const head = root.querySelector<HTMLElement>('[data-rp-head]');
+    const pct  = root.querySelector<HTMLElement>('[data-rp-pct]');
+    const article = document.querySelector<HTMLElement>('article');
+    if (!fill || !head || !pct) return;
+
+    let raf = 0;
+    const tick = () => {
+      raf = 0;
+      let p: number;
+      if (article) {
+        const rect = article.getBoundingClientRect();
+        const total = rect.height - window.innerHeight;
+        const passed = -rect.top;
+        p = total > 0 ? Math.min(1, Math.max(0, passed / total)) : 0;
+      } else {
+        const total = (document.documentElement.scrollHeight - window.innerHeight) || 1;
+        p = Math.min(1, Math.max(0, window.scrollY / total));
+      }
+      fill.style.height = (p * 100).toFixed(2) + '%';
+      head.style.top    = (p * 100).toFixed(2) + '%';
+      pct.textContent   = Math.round(p * 100).toString().padStart(2, '0') + '%';
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(tick); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    tick();
+  }
+  bootReadingProgress();
+  document.addEventListener('astro:page-load', bootReadingProgress);
+</script>

@@ -1,0 +1,88 @@
+---
+/**
+ * HudLive — top-right floating mono HUD with live clock and date.
+ * Updates every second. Pure decorative — feels like a control room.
+ */
+---
+<div class="hud" aria-hidden="true">
+  <span class="hud__pulse"></span>
+  <span class="hud__label">LIVE</span>
+  <span class="hud__sep">·</span>
+  <span class="hud__date" data-hud-date>0000.00.00</span>
+  <span class="hud__sep">·</span>
+  <span class="hud__time" data-hud-time>00:00:00</span>
+</div>
+
+<style>
+  .hud {
+    position: fixed;
+    top: calc(var(--nav-h) + 0.6rem);
+    right: var(--shell-px);
+    z-index: 950;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.4rem 0.8rem;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-6px);
+    animation: hudFadeIn 900ms var(--ease-out) 1.4s forwards;
+  }
+  @keyframes hudFadeIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hud__pulse {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #ff5d6e;
+    box-shadow: 0 0 8px rgba(255, 93, 110, 0.85);
+    animation: hudPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes hudPulse {
+    0%, 100% { opacity: 0.4; transform: scale(0.85); }
+    50%      { opacity: 1;   transform: scale(1.15); }
+  }
+  .hud__label {
+    color: var(--text);
+    font-weight: 500;
+    letter-spacing: 0.32em;
+  }
+  .hud__sep { color: var(--text-faint); }
+  .hud__date,
+  .hud__time {
+    font-variant-numeric: tabular-nums;
+    color: var(--text-soft);
+  }
+  @media (max-width: 720px) {
+    .hud { display: none; }
+  }
+</style>
+
+<script>
+  function bootHud() {
+    const date = document.querySelector<HTMLElement>('[data-hud-date]');
+    const time = document.querySelector<HTMLElement>('[data-hud-time]');
+    if (!date || !time) return;
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const tick = () => {
+      const d = new Date();
+      date.textContent = `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}`;
+      time.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    };
+    tick();
+    const id = window.setInterval(tick, 1000);
+    document.addEventListener('astro:before-swap', () => window.clearInterval(id), { once: true });
+  }
+  bootHud();
+  document.addEventListener('astro:page-load', bootHud);
+</script>

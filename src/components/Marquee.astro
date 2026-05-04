@@ -1,0 +1,128 @@
+---
+/**
+ * Marquee — infinite scrolling text band.
+ *
+ * Props:
+ *   items: string[]           the strings to show, separated by a divider
+ *   speed: number             seconds per loop (default 28)
+ *   reverse: bool             scroll right-to-left if false, left-to-right if true
+ *   divider: string           glyph between items (default "·")
+ *   variant: 'glow' | 'plain' (default 'glow')
+ */
+interface Props {
+  items: string[];
+  speed?: number;
+  reverse?: boolean;
+  divider?: string;
+  variant?: 'glow' | 'plain';
+}
+const { items, speed = 28, reverse = false, divider = '·', variant = 'glow' } = Astro.props;
+
+// repeat the items twice so the strip can scroll seamlessly
+const train = [...items, ...items];
+---
+
+<div class:list={['mq', `mq--${variant}`, { 'mq--rev': reverse }]} style={`--mq-speed: ${speed}s;`}>
+  <div class="mq__edge mq__edge--l" aria-hidden="true"></div>
+  <div class="mq__edge mq__edge--r" aria-hidden="true"></div>
+
+  <div class="mq__track">
+    {[0, 1].map(() => (
+      <div class="mq__row">
+        {train.map((it) => (
+          <span class="mq__item">
+            <span class="mq__glyph">{it}</span>
+            <span class="mq__dot" aria-hidden="true">{divider}</span>
+          </span>
+        ))}
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .mq {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    padding: 1.1rem 0;
+    border-block: 1px solid var(--border);
+    isolation: isolate;
+  }
+
+  .mq--glow {
+    background:
+      radial-gradient(800px 80px at 50% 50%, rgba(190, 210, 255, 0.06), transparent 70%),
+      linear-gradient(180deg, rgba(255,255,255,0.012), transparent);
+  }
+
+  /* fade out the edges */
+  .mq__edge {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 14%;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .mq__edge--l {
+    left: 0;
+    background: linear-gradient(90deg, var(--bg) 0%, transparent 100%);
+  }
+  .mq__edge--r {
+    right: 0;
+    background: linear-gradient(270deg, var(--bg) 0%, transparent 100%);
+  }
+
+  .mq__track {
+    display: flex;
+    gap: 0;
+    width: max-content;
+    animation: mqScroll var(--mq-speed, 28s) linear infinite;
+    will-change: transform;
+  }
+  .mq--rev .mq__track { animation-direction: reverse; }
+  .mq:hover .mq__track { animation-play-state: paused; }
+
+  .mq__row {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .mq__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.4rem;
+    padding: 0 1.4rem;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(1.4rem, 2.4vw, 2.2rem);
+    color: var(--text-soft);
+    letter-spacing: -0.015em;
+    white-space: nowrap;
+    transition: color var(--dur) var(--ease-soft);
+  }
+  .mq__item:hover { color: var(--text); }
+
+  .mq__glyph {
+    display: inline-block;
+    background: linear-gradient(180deg, #ffffff 0%, #b9c4e3 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    /* keep an outline color for browsers that don't support clip */
+    color: #ffffff;
+    text-shadow: 0 0 24px rgba(190, 210, 255, 0.18);
+  }
+
+  .mq__dot {
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+
+  @keyframes mqScroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+</style>

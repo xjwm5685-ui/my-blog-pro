@@ -1,0 +1,47 @@
+---
+/**
+ * Equalizer — purely visual audio-bar display. 12 bars, each animates
+ * with its own sine-driven height. Used in the footer.
+ */
+const bars = Array.from({ length: 12 });
+---
+<div class="eq" aria-hidden="true">
+  {bars.map((_, i) => (
+    <span class="eq__bar" style={`--i: ${i};`}></span>
+  ))}
+</div>
+
+<style>
+  .eq {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 28px;
+    padding: 2px 0;
+  }
+  .eq__bar {
+    display: block;
+    width: 3px;
+    background: linear-gradient(to top,
+      rgba(190, 210, 255, 0.85),
+      rgba(255, 255, 255, 0.95));
+    box-shadow: 0 0 6px rgba(190, 210, 255, 0.55);
+    transform-origin: bottom;
+    animation: eqJump calc(0.62s + (var(--i) * 0.07s)) ease-in-out infinite;
+    animation-delay: calc(var(--i) * -0.13s);
+    height: 30%;
+  }
+  /* alternating tempos so it looks polyrhythmic */
+  .eq__bar:nth-child(3n)   { animation-duration: 0.84s; }
+  .eq__bar:nth-child(4n+1) { animation-duration: 0.51s; }
+  .eq__bar:nth-child(5n+2) { animation-duration: 1.10s; }
+
+  @keyframes eqJump {
+    0%, 100% { height: 18%;  filter: brightness(0.7); }
+    18%      { height: 92%;  filter: brightness(1.4); }
+    36%      { height: 38%;  filter: brightness(0.8); }
+    54%      { height: 78%;  filter: brightness(1.25); }
+    72%      { height: 28%;  filter: brightness(0.65); }
+    88%      { height: 64%;  filter: brightness(1.05); }
+  }
+</style>

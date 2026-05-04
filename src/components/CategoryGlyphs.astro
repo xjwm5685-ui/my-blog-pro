@@ -1,0 +1,341 @@
+---
+/**
+ * CategoryGlyphs — SVG decoration for the [CATEGORIES] block title.
+ * A horizontal undulating constellation path connects three nodes
+ * (Tech / Notes / Travel) — each with a line-art glyph above. Path,
+ * glyphs, halos, sparkles all draw in via stroke-dasharray when the
+ * section enters the viewport, then idle with subtle bobbing.
+ */
+---
+<div class="cg" data-cg aria-hidden="true">
+  <svg
+    class="cg__svg"
+    viewBox="0 0 1200 220"
+    preserveAspectRatio="xMidYMid meet"
+    role="presentation"
+  >
+    <defs>
+      <linearGradient id="cgLine" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"   stop-color="rgba(190, 210, 255, 0)"/>
+        <stop offset="20%"  stop-color="rgba(190, 210, 255, 0.55)"/>
+        <stop offset="80%"  stop-color="rgba(190, 210, 255, 0.55)"/>
+        <stop offset="100%" stop-color="rgba(190, 210, 255, 0)"/>
+      </linearGradient>
+      <linearGradient id="cgGlow" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%"   stop-color="rgba(255, 255, 255, 0.95)"/>
+        <stop offset="100%" stop-color="rgba(190, 210, 255, 0.55)"/>
+      </linearGradient>
+      <radialGradient id="cgHalo" cx="50%" cy="50%" r="50%">
+        <stop offset="0%"   stop-color="rgba(255, 255, 255, 0.85)"/>
+        <stop offset="40%"  stop-color="rgba(190, 210, 255, 0.30)"/>
+        <stop offset="100%" stop-color="rgba(190, 210, 255, 0)"/>
+      </radialGradient>
+      <filter id="cgBloom" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="3"/>
+      </filter>
+    </defs>
+
+    <!-- horizontal undulating path connecting the 3 nodes at y=160 -->
+    <path
+      class="cg__line"
+      d="M 60 160
+         Q 200 130 360 160
+         T 600 160
+         T 840 160
+         T 1140 160"
+    />
+
+    <!-- ambient sparkles drifting along the path region -->
+    <g class="cg__sparkles">
+      {[
+        [120, 150], [200, 175], [280, 145], [420, 165], [500, 140],
+        [560, 180], [680, 150], [760, 175], [900, 140], [980, 170], [1080, 155]
+      ].map(([x, y], i) => (
+        <circle class="cg__sparkle" cx={x} cy={y} r="1.4" style={`--si: ${i};`} />
+      ))}
+    </g>
+
+    <!-- ============ NODE 1 — TECH (terminal glyph) at x=360 ============ -->
+    <g class="cg__node" style="--ni: 0">
+      <circle class="cg__halo"  cx="360" cy="160" r="22" fill="url(#cgHalo)"/>
+      <circle class="cg__pulse" cx="360" cy="160" r="14"/>
+      <circle class="cg__dot"   cx="360" cy="160" r="3.5" fill="url(#cgGlow)"/>
+
+      <!-- vertical connector line up to the icon -->
+      <line class="cg__riser" x1="360" y1="148" x2="360" y2="105"/>
+
+      <!-- terminal glyph centered on x=360, y=70 (positioning wrapper, animation on inner g) -->
+      <g transform="translate(338 50)">
+        <g class="cg__glyph">
+          <rect class="cg__draw" x="0.5" y="0.5" width="44" height="32" rx="2"/>
+          <line class="cg__draw" x1="0.5" y1="9" x2="44.5" y2="9"/>
+          <circle class="cg__draw cg__draw--dot" cx="5"  cy="5" r="1"/>
+          <circle class="cg__draw cg__draw--dot" cx="9"  cy="5" r="1"/>
+          <circle class="cg__draw cg__draw--dot" cx="13" cy="5" r="1"/>
+          <path class="cg__draw" d="M 8 18 L 13 22 L 8 26"/>
+          <line class="cg__draw" x1="17" y1="26" x2="29" y2="26"/>
+        </g>
+      </g>
+
+      <text class="cg__label" x="360" y="195" text-anchor="middle">TECH</text>
+    </g>
+
+    <!-- ============ NODE 2 — NOTES (book glyph) at x=600 ============ -->
+    <g class="cg__node" style="--ni: 1">
+      <circle class="cg__halo"  cx="600" cy="160" r="22" fill="url(#cgHalo)"/>
+      <circle class="cg__pulse" cx="600" cy="160" r="14"/>
+      <circle class="cg__dot"   cx="600" cy="160" r="3.5" fill="url(#cgGlow)"/>
+
+      <line class="cg__riser" x1="600" y1="148" x2="600" y2="105"/>
+
+      <!-- book glyph centered on x=600, y=70 -->
+      <g transform="translate(578 48)">
+        <g class="cg__glyph">
+          <path class="cg__draw" d="M 1 4 Q 12 0 22 4 L 22 32 Q 12 28 1 32 Z"/>
+          <path class="cg__draw" d="M 22 4 Q 32 0 43 4 L 43 32 Q 32 28 22 32 Z"/>
+          <line class="cg__draw" x1="22" y1="4"  x2="22" y2="32"/>
+          <line class="cg__draw" x1="6"  y1="11" x2="18" y2="11"/>
+          <line class="cg__draw" x1="6"  y1="17" x2="16" y2="17"/>
+          <line class="cg__draw" x1="6"  y1="23" x2="18" y2="23"/>
+          <line class="cg__draw" x1="26" y1="11" x2="38" y2="11"/>
+          <line class="cg__draw" x1="26" y1="17" x2="36" y2="17"/>
+        </g>
+      </g>
+
+      <text class="cg__label" x="600" y="195" text-anchor="middle">NOTES</text>
+    </g>
+
+    <!-- ============ NODE 3 — TRAVEL (mountains+sun glyph) at x=840 ============ -->
+    <g class="cg__node" style="--ni: 2">
+      <circle class="cg__halo"  cx="840" cy="160" r="22" fill="url(#cgHalo)"/>
+      <circle class="cg__pulse" cx="840" cy="160" r="14"/>
+      <circle class="cg__dot"   cx="840" cy="160" r="3.5" fill="url(#cgGlow)"/>
+
+      <line class="cg__riser" x1="840" y1="148" x2="840" y2="105"/>
+
+      <!-- mountains+sun centered at x=840, y=70 -->
+      <g transform="translate(816 50)">
+        <g class="cg__glyph">
+          <line class="cg__draw" x1="0" y1="32" x2="48" y2="32"/>
+          <path class="cg__draw" d="M 4 32 L 18 6 L 28 22 L 36 12 L 44 32"/>
+          <circle class="cg__draw" cx="36" cy="8" r="3.5"/>
+          <line class="cg__draw cg__draw--ray" x1="36" y1="0"  x2="36" y2="2.5"/>
+          <line class="cg__draw cg__draw--ray" x1="42" y1="2"  x2="40" y2="4"/>
+          <line class="cg__draw cg__draw--ray" x1="30" y1="2"  x2="32" y2="4"/>
+        </g>
+      </g>
+
+      <text class="cg__label" x="840" y="195" text-anchor="middle">TRAVEL</text>
+    </g>
+
+    <!-- corner brackets framing the whole thing -->
+    <g class="cg__brackets">
+      <path class="cg__bracket" d="M 30 40 L 8 40 L 8 70"/>
+      <path class="cg__bracket" d="M 1170 40 L 1192 40 L 1192 70"/>
+      <path class="cg__bracket" d="M 30 200 L 8 200 L 8 170"/>
+      <path class="cg__bracket" d="M 1170 200 L 1192 200 L 1192 170"/>
+    </g>
+  </svg>
+</div>
+
+<style>
+  .cg {
+    position: relative;
+    width: 100%;
+    max-width: 980px;
+    aspect-ratio: 1200 / 220;
+    margin: 0 0 1rem;
+    pointer-events: none;
+    /* subtle wash so the SVG doesn't compete with the heading */
+    opacity: 0.92;
+  }
+  .cg__svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* ============ undulating path ============ */
+  .cg__line {
+    fill: none;
+    stroke: url(#cgLine);
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-dasharray: 2400;
+    stroke-dashoffset: 2400;
+    transition: stroke-dashoffset 2200ms cubic-bezier(0.16, 1, 0.3, 1) 100ms;
+    filter: drop-shadow(0 0 4px rgba(190, 210, 255, 0.45));
+  }
+  .cg.is-drawn .cg__line { stroke-dashoffset: 0; }
+
+  /* ============ sparkles ============ */
+  .cg__sparkle {
+    fill: rgba(225, 235, 255, 0.7);
+    opacity: 0;
+    transform-origin: center;
+    transition: opacity 600ms ease;
+    transition-delay: calc(800ms + var(--si) * 80ms);
+    filter: drop-shadow(0 0 3px rgba(190, 210, 255, 0.85));
+  }
+  .cg.is-drawn .cg__sparkle {
+    opacity: 1;
+    animation: cgTwinkle calc(2s + var(--si) * 0.13s) ease-in-out infinite;
+    animation-delay: calc(2200ms + var(--si) * 80ms);
+  }
+  @keyframes cgTwinkle {
+    0%, 100% { opacity: 0.25; transform: scale(0.8); }
+    50%      { opacity: 1;    transform: scale(1.4); }
+  }
+
+  /* ============ nodes ============ */
+  .cg__halo {
+    opacity: 0;
+    transform-origin: center;
+    transition: opacity 600ms ease;
+    transition-delay: calc(1200ms + var(--ni) * 200ms);
+  }
+  .cg.is-drawn .cg__halo {
+    opacity: 1;
+    animation: cgHaloPulse 3.2s ease-in-out infinite;
+    animation-delay: calc(2200ms + var(--ni) * 240ms);
+  }
+  @keyframes cgHaloPulse {
+    0%, 100% { opacity: 0.35; }
+    50%      { opacity: 1; }
+  }
+
+  .cg__pulse {
+    fill: none;
+    stroke: rgba(190, 210, 255, 0.65);
+    stroke-width: 1;
+    opacity: 0;
+    transform-origin: center center;
+    transform-box: fill-box;
+  }
+  .cg.is-drawn .cg__pulse {
+    animation: cgPulseRing 2.8s ease-out infinite;
+    animation-delay: calc(2600ms + var(--ni) * 360ms);
+  }
+  @keyframes cgPulseRing {
+    0%   { opacity: 0.85; transform: scale(0.5); }
+    80%  { opacity: 0;    transform: scale(2.2); }
+    100% { opacity: 0;    transform: scale(2.2); }
+  }
+
+  .cg__dot {
+    opacity: 0;
+    transition: opacity 400ms ease;
+    transition-delay: calc(1100ms + var(--ni) * 200ms);
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.85));
+  }
+  .cg.is-drawn .cg__dot { opacity: 1; }
+
+  .cg__riser {
+    stroke: rgba(190, 210, 255, 0.45);
+    stroke-width: 1;
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+    transition: stroke-dashoffset 700ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: calc(1400ms + var(--ni) * 200ms);
+  }
+  .cg.is-drawn .cg__riser { stroke-dashoffset: 0; }
+
+  /* ============ line-art glyphs ============ */
+  .cg__glyph {
+    transform-box: fill-box;
+    transform-origin: center;
+    /* glyph itself sits at local (0,0) inside an outer translate-wrapper
+       so this animation is safe — does not override SVG positioning. */
+  }
+  .cg.is-drawn .cg__glyph {
+    animation: cgGlyphFloat 5s ease-in-out infinite;
+    animation-delay: calc(3000ms + var(--ni) * 240ms);
+  }
+  @keyframes cgGlyphFloat {
+    0%, 100% { transform: translate(0, 0); }
+    50%      { transform: translate(0, -3px); }
+  }
+
+  .cg__draw {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.85);
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 240;
+    stroke-dashoffset: 240;
+    transition: stroke-dashoffset 1100ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: calc(1700ms + var(--ni) * 220ms);
+    filter: drop-shadow(0 0 3px rgba(190, 210, 255, 0.5));
+  }
+  .cg__draw--dot {
+    stroke-dasharray: 8;
+    stroke-dashoffset: 8;
+  }
+  .cg__draw--ray {
+    stroke-dasharray: 6;
+    stroke-dashoffset: 6;
+  }
+  .cg.is-drawn .cg__draw,
+  .cg.is-drawn .cg__draw--dot,
+  .cg.is-drawn .cg__draw--ray {
+    stroke-dashoffset: 0;
+  }
+
+  /* ============ labels ============ */
+  .cg__label {
+    fill: rgba(255, 255, 255, 0.85);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 4px;
+    opacity: 0;
+    transition: opacity 500ms ease;
+    transition-delay: calc(2200ms + var(--ni) * 200ms);
+  }
+  .cg.is-drawn .cg__label { opacity: 0.85; }
+
+  /* ============ corner brackets ============ */
+  .cg__bracket {
+    fill: none;
+    stroke: rgba(190, 210, 255, 0.40);
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+    transition: stroke-dashoffset 800ms cubic-bezier(0.16, 1, 0.3, 1) 0ms;
+  }
+  .cg.is-drawn .cg__bracket { stroke-dashoffset: 0; }
+  .cg.is-drawn .cg__bracket:nth-child(2) { transition-delay: 100ms; }
+  .cg.is-drawn .cg__bracket:nth-child(3) { transition-delay: 200ms; }
+  .cg.is-drawn .cg__bracket:nth-child(4) { transition-delay: 300ms; }
+
+  @media (max-width: 720px) {
+    .cg { aspect-ratio: 1200 / 280; }
+    .cg__label { font-size: 12px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cg__line, .cg__draw, .cg__riser, .cg__bracket { stroke-dashoffset: 0; transition: none; }
+    .cg__halo, .cg__sparkle, .cg__glyph, .cg__pulse { animation: none !important; }
+    .cg__dot, .cg__label, .cg__sparkle, .cg__halo { opacity: 1; }
+  }
+</style>
+
+<script>
+  function bootCG() {
+    document.querySelectorAll<HTMLElement>('[data-cg]').forEach((el) => {
+      if ((el as any).__cg) return;
+      (el as any).__cg = true;
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            el.classList.add('is-drawn');
+            io.unobserve(el);
+          }
+        }
+      }, { threshold: 0.25, rootMargin: '0px 0px -8% 0px' });
+      io.observe(el);
+    });
+  }
+  bootCG();
+  document.addEventListener('astro:page-load', bootCG);
+</script>

@@ -51,7 +51,7 @@ const projects = [
 
     <div class="projects__grid">
       {projects.map((p, i) => (
-        <article class="project" data-reveal data-tilt data-tilt-max="6" style={`--reveal-delay: ${i * 100}ms;`}>
+        <article class="project" data-reveal style={`--reveal-delay: ${i * 100}ms;`}>
           <div class="project__head">
             <span class="bracket-label">PROJECT · 0{i + 1}</span>
             <span class="project__lede">{p.tagline}</span>
@@ -127,6 +127,7 @@ const projects = [
 
   .project {
     position: relative;
+    isolation: isolate;
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -211,6 +212,8 @@ const projects = [
   .project:hover .project__sketch { color: var(--text-dim); }
 
   .project__cta {
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;

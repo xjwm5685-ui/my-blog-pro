@@ -94,12 +94,12 @@ const focusAreas = [
 
           <div class="stack">
             {techStack.map((t, i) => (
-              <div class="stack__row" style={`--i: ${i};`}>
+              <div class="stack__row" style={`--i: ${i};`} data-stack-row data-pct={t.pct}>
                 <div class="stack__head">
                   <span class="stack__name">{t.name}</span>
-                  <span class="stack__pct">{t.pct.toString().padStart(3, '0')}%</span>
+                  <span class="stack__pct" data-stack-pct>000%</span>
                 </div>
-                <div class="stack__bar"><span style={`width: ${t.pct}%`}></span></div>
+                <div class="stack__bar"><span data-stack-fill></span></div>
                 <span class="stack__desc">{t.desc}</span>
               </div>
             ))}
@@ -369,14 +369,35 @@ const focusAreas = [
   }
   .stack__bar span {
     display: block;
+    width: 0;
     height: 1px;
-    background: linear-gradient(90deg, rgba(190, 210, 255, 0.65), rgba(255, 255, 255, 0.85));
-    box-shadow: 0 0 12px rgba(190, 210, 255, 0.35);
+    background: linear-gradient(90deg, rgba(190, 210, 255, 0.65), rgba(255, 255, 255, 0.95));
+    box-shadow: 0 0 12px rgba(190, 210, 255, 0.45);
     transform-origin: left;
-    animation: stackFill 1200ms var(--ease-out) both;
-    animation-delay: calc(var(--i, 0) * 90ms);
+    transition: width 1500ms cubic-bezier(0.22, 1, 0.36, 1);
   }
-  @keyframes stackFill { from { width: 0; } }
+  .stack__bar span::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -1px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow:
+      0 0 8px rgba(255, 255, 255, 0.95),
+      0 0 18px rgba(190, 210, 255, 0.7);
+    opacity: 0;
+    transition: opacity 1200ms ease 600ms;
+  }
+  .stack__row.is-counted .stack__bar span::after { opacity: 1; }
+  .stack__pct {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    color: var(--text);
+  }
   .stack__desc {
     font-family: var(--font-cn);
     font-size: 0.82rem;
@@ -406,3 +427,53 @@ const focusAreas = [
     .focus-list__note { grid-column: 1 / -1; }
   }
 </style>
+
+<script>
+  /* Tech-stack count-up — bar fills + percent ticks from 0 to its target
+     when the row scrolls into view. */
+  function bootStackCount() {
+    const rows = document.querySelectorAll<HTMLElement>('[data-stack-row]');
+    if (!rows.length) return;
+
+    const animateRow = (row: HTMLElement, delay: number) => {
+      const target = Number(row.dataset.pct || '0');
+      const fill   = row.querySelector<HTMLElement>('[data-stack-fill]');
+      const pctEl  = row.querySelector<HTMLElement>('[data-stack-pct]');
+      const dur    = 1500;
+      const start  = performance.now() + delay;
+
+      // bar uses CSS transition, just set width after a small delay
+      window.setTimeout(() => {
+        if (fill) fill.style.width = target + '%';
+        row.classList.add('is-counted');
+      }, delay);
+
+      const ease = (t: number) => 1 - Math.pow(1 - t, 3); // easeOutCubic
+      const tick = (now: number) => {
+        const elapsed = now - start;
+        if (elapsed < 0) { requestAnimationFrame(tick); return; }
+        const t = Math.min(1, elapsed / dur);
+        const v = Math.round(ease(t) * target);
+        if (pctEl) pctEl.textContent = v.toString().padStart(3, '0') + '%';
+        if (t < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e, idx) => {
+        if (!e.isIntersecting) return;
+        const row = e.target as HTMLElement;
+        if ((row as any).__counted) return;
+        (row as any).__counted = true;
+        const i = Number(row.style.getPropertyValue('--i')) || 0;
+        animateRow(row, i * 90);
+        io.unobserve(row);
+      });
+    }, { threshold: 0.4 });
+    rows.forEach(r => io.observe(r));
+  }
+
+  bootStackCount();
+  document.addEventListener('astro:page-load', bootStackCount);
+</script>

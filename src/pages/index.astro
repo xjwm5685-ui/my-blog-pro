@@ -4,6 +4,12 @@ import PostCard from '@components/PostCard.astro';
 import LightBeam from '@components/LightBeam.astro';
 import Constellation from '@components/Constellation.astro';
 import CategoryCard from '@components/CategoryCard.astro';
+import CategoryGlyphs from '@components/CategoryGlyphs.astro';
+import Marquee from '@components/Marquee.astro';
+import AsciiDivider from '@components/AsciiDivider.astro';
+import NowReading from '@components/NowReading.astro';
+import AuroraMesh from '@components/AuroraMesh.astro';
+import ParticleEntrance from '@components/ParticleEntrance.astro';
 import Search from '@components/Search.astro';
 import { getAllPosts } from '@/utils/post';
 import { SITE_CONFIG } from '@/config';
@@ -21,13 +27,28 @@ const letters = Array.from(wordmark);
   <!-- ============================================================
        HERO  —  3D parallax stage · wordmark · light beam · search
        ============================================================ -->
-  <section class="hero" data-tilt-host>
+  <!-- ============================================================
+       FIRST-VISIT CINEMATIC  —  particle convergence
+       ============================================================ -->
+  <ParticleEntrance />
+
+  <!-- ============================================================
+       HERO  —  3D parallax stage · wordmark · light beam · search
+       ============================================================ -->
+  <section class="hero" data-tilt-host data-section-name="HERO · WYHEF">
     <div class="hero__bg" aria-hidden="true">
+      <AuroraMesh />
       <LightBeam side="right" />
       <div class="hero__grid" aria-hidden="true"></div>
     </div>
 
     <div class="hero__stage" data-stage>
+      <div class="hero__particles" aria-hidden="true">
+        {Array.from({ length: 22 }).map((_, i) => (
+          <span class="dust" style={`--di: ${i};`}></span>
+        ))}
+      </div>
+
       <div class="hero__top shell" data-z="20">
         <span class="bracket-label">INTRODUCING</span>
         {featured && (
@@ -74,13 +95,39 @@ const letters = Array.from(wordmark);
   </section>
 
   <!-- ============================================================
+       MARQUEE — between hero and categories
+       ============================================================ -->
+  <Marquee
+    items={['记录技术', 'Engineering', '学习笔记', 'Field notes', '远方游记', 'Cities', 'WYHEF', 'EST · 2024', '吴煜凡', 'A field log', '光年之外', 'Light-years away']}
+    speed={36}
+  />
+
+  <AsciiDivider density={84} speed={90} />
+
+  <!-- ============================================================
        CATEGORIES
        ============================================================ -->
-  <section class="block shell">
+  <section class="block shell" data-section-name="[ CATEGORIES ]">
     <header class="block__head">
       <span class="bracket-label" data-reveal>CATEGORIES</span>
-      <h2 class="block__title" data-reveal style="--reveal-delay: 80ms">
-        记录技术 · 学习 · 远方<br/>
+      <CategoryGlyphs />
+      <h2 class="block__title block__title--journey" data-reveal style="--reveal-delay: 80ms">
+        <span class="journey">
+          <span class="journey__word"><span class="journey__char-stack">记录技术</span></span>
+          <span class="journey__sep" aria-hidden="true">
+            <svg viewBox="0 0 60 14" preserveAspectRatio="none" aria-hidden="true">
+              <path class="journey__sep-path" d="M 2 7 Q 15 1 30 7 T 58 7"/>
+            </svg>
+          </span>
+          <span class="journey__word"><span class="journey__char-stack">学习</span></span>
+          <span class="journey__sep" aria-hidden="true">
+            <svg viewBox="0 0 60 14" preserveAspectRatio="none" aria-hidden="true">
+              <path class="journey__sep-path" d="M 2 7 Q 15 13 30 7 T 58 7"/>
+            </svg>
+          </span>
+          <span class="journey__word"><span class="journey__char-stack">远方</span></span>
+        </span>
+        <br/>
         <span class="block__title-faint">A space for what I notice.</span>
       </h2>
     </header>
@@ -129,7 +176,7 @@ const letters = Array.from(wordmark);
   <!-- ============================================================
        LATEST
        ============================================================ -->
-  <section class="block shell">
+  <section class="block shell" data-section-name="[ LATEST ]">
     <header class="block__head block__head--row">
       <div>
         <span class="bracket-label" data-reveal>LATEST</span>
@@ -148,9 +195,19 @@ const letters = Array.from(wordmark);
   </section>
 
   <!-- ============================================================
+       MARQUEE — between latest and about
+       ============================================================ -->
+  <AsciiDivider density={84} speed={120} />
+  <Marquee
+    items={['READ', '思考', 'WRITE', '记录', 'OBSERVE', '凝视', 'TRAVEL', '远方', 'BUILD', '构建']}
+    speed={48}
+    reverse={true}
+  />
+
+  <!-- ============================================================
        ABOUT STRIP
        ============================================================ -->
-  <section class="block shell about-strip">
+  <section class="block shell about-strip" data-section-name="[ WHO ]">
     <span class="bracket-label" data-reveal>WHO</span>
 
     <div class="about-card" data-reveal data-tilt data-tilt-max="5" style="--reveal-delay: 100ms">
@@ -176,11 +233,13 @@ const letters = Array.from(wordmark);
       </div>
 
       <span class="about-card__corner about-card__corner--tl"></span>
-      <span class="about-card__corner about-card__corner--tr"></span>
       <span class="about-card__corner about-card__corner--bl"></span>
-      <span class="about-card__corner about-card__corner--br"></span>
     </div>
   </section>
+
+  {featured && (
+    <NowReading title={featured.data.title} slug={featured.slug} date={featured.data.pubDate} />
+  )}
 </BaseLayout>
 
 <style>
@@ -198,11 +257,66 @@ const letters = Array.from(wordmark);
     perspective-origin: 50% 45%;
   }
 
+  /* Section snap — desktop only, "proximity" so we don't fight the user */
+  @media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
+    :global(html) {
+      scroll-snap-type: y proximity;
+    }
+    .hero,
+    :global(section.block),
+    :global(.constellation),
+    :global(.mq),
+    :global(.ad) {
+      scroll-snap-align: start;
+      scroll-snap-stop: normal;
+    }
+  }
+
   .hero__bg {
     position: absolute;
     inset: 0;
     pointer-events: none;
     z-index: 0;
+  }
+
+  /* drifting dust particles in front of the beam */
+  .hero__particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+  .dust {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: rgba(225, 235, 255, 0.85);
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(190, 210, 255, 0.6);
+    /* spread the particles deterministically across the hero */
+    left:  calc(((var(--di) * 47) % 100) * 1%);
+    top:   calc(((var(--di) * 73) % 100) * 1%);
+    opacity: 0;
+    --dust-px: 0px;
+    --dust-py: 0px;
+    animation:
+      dustRise calc(11s + (var(--di) * 0.31s)) ease-in-out infinite,
+      dustTwinkle calc(2.4s + (var(--di) * 0.13s)) ease-in-out infinite;
+    animation-delay:
+      calc(var(--di) * -0.7s),
+      calc(var(--di) * -0.2s);
+  }
+  @keyframes dustRise {
+    0%   { transform: translate(calc(0px   + var(--dust-px)), calc(30px   + var(--dust-py))) scale(0.6); opacity: 0; }
+    15%  { opacity: 0.85; }
+    50%  { transform: translate(calc(-12px + var(--dust-px)), calc(-120px + var(--dust-py))) scale(1.1); opacity: 1; }
+    85%  { opacity: 0.4; }
+    100% { transform: translate(calc(-22px + var(--dust-px)), calc(-240px + var(--dust-py))) scale(0.8); opacity: 0; }
+  }
+  @keyframes dustTwinkle {
+    0%, 100% { filter: brightness(0.55); }
+    50%      { filter: brightness(1.5); }
   }
 
   /* perspective floor grid — distant horizon */
@@ -507,6 +621,103 @@ const letters = Array.from(wordmark);
     font-size: 0.7em;
   }
 
+  /* ===================== JOURNEY title ===================== */
+  /* "记录技术 · 学习 · 远方" — three word blocks with animated SVG
+     separators that draw in as the user enters the section. */
+  .journey {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.45em;
+    line-height: 1.2;
+  }
+  .journey__word {
+    position: relative;
+    display: inline-block;
+    color: var(--text);
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(8px);
+    transition:
+      opacity   900ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 900ms cubic-bezier(0.16, 1, 0.3, 1),
+      filter    900ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .journey__word:nth-of-type(1) { transition-delay: 200ms; }
+  .journey__word:nth-of-type(2) { transition-delay: 700ms; }
+  .journey__word:nth-of-type(3) { transition-delay: 1200ms; }
+
+  /* lit underline that grows in after the word lands */
+  .journey__word::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    height: 1px;
+    width: 0;
+    background: linear-gradient(90deg,
+      rgba(190, 210, 255, 0),
+      rgba(190, 210, 255, 0.85) 50%,
+      rgba(190, 210, 255, 0));
+    box-shadow: 0 0 8px rgba(190, 210, 255, 0.65);
+    transition: width 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .journey__word:nth-of-type(1)::after { transition-delay: 800ms; }
+  .journey__word:nth-of-type(2)::after { transition-delay: 1300ms; }
+  .journey__word:nth-of-type(3)::after { transition-delay: 1800ms; }
+
+  /* SVG separator — undulating stroke that draws between words */
+  .journey__sep {
+    display: inline-block;
+    width: 2.4em;
+    height: 0.6em;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 600ms ease;
+  }
+  .journey__sep svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .journey__sep-path {
+    fill: none;
+    stroke: rgba(190, 210, 255, 0.7);
+    stroke-width: 1.2;
+    stroke-linecap: round;
+    stroke-dasharray: 80;
+    stroke-dashoffset: 80;
+    filter: drop-shadow(0 0 4px rgba(190, 210, 255, 0.6));
+    transition: stroke-dashoffset 1100ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .journey__sep:nth-of-type(2) { transition-delay: 600ms; }
+  .journey__sep:nth-of-type(2) .journey__sep-path { transition-delay: 600ms; }
+  .journey__sep:nth-of-type(4) { transition-delay: 1100ms; }
+  .journey__sep:nth-of-type(4) .journey__sep-path { transition-delay: 1100ms; }
+
+  /* All triggered by the existing data-reveal IO */
+  .block__title--journey.is-visible .journey__word {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+  .block__title--journey.is-visible .journey__word::after {
+    width: 100%;
+  }
+  .block__title--journey.is-visible .journey__sep {
+    opacity: 1;
+  }
+  .block__title--journey.is-visible .journey__sep-path {
+    stroke-dashoffset: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .journey__word, .journey__sep, .journey__sep-path { transition: none !important; }
+    .journey__word { opacity: 1; transform: none; filter: none; }
+    .journey__sep { opacity: 1; }
+    .journey__sep-path { stroke-dashoffset: 0; }
+  }
+
   /* ===================== CARDS GRID ===================== */
   .cards {
     display: grid;
@@ -534,6 +745,7 @@ const letters = Array.from(wordmark);
     margin-top: 1rem;
     background: var(--bg-card);
     border: 1px solid var(--border);
+    overflow: visible;
     transition: border-color var(--dur) var(--ease-soft);
   }
   .about-card:hover { border-color: var(--border-strong); }
@@ -599,20 +811,30 @@ const letters = Array.from(wordmark);
 
   .about-card__corner {
     position: absolute;
-    width: 12px;
-    height: 12px;
+    z-index: 2;
+    width: 20px;
+    height: 18px;
     border: 0 solid var(--text);
-    opacity: 0.3;
+    opacity: 0.42;
     pointer-events: none;
+    transition:
+      opacity var(--dur) var(--ease-soft),
+      border-color var(--dur) var(--ease-soft);
   }
-  .about-card__corner--tl { top: 6px; left: 6px;  border-top-width: 1px; border-left-width: 1px; }
-  .about-card__corner--tr { top: 6px; right: 6px;  border-top-width: 1px; border-right-width: 1px; }
-  .about-card__corner--bl { bottom: 6px; left: 6px;  border-bottom-width: 1px; border-left-width: 1px; }
-  .about-card__corner--br { bottom: 6px; right: 6px;  border-bottom-width: 1px; border-right-width: 1px; }
+  .about-card:hover .about-card__corner {
+    opacity: 0.68;
+    border-color: var(--border-strong);
+  }
+  .about-card__corner--tl { top: -1px; left: -1px;  border-top-width: 1px; border-left-width: 1px; }
+  .about-card__corner--bl { bottom: -1px; left: -1px;  border-bottom-width: 1px; border-left-width: 1px; }
 
   @media (max-width: 720px) {
     .about-card { grid-template-columns: 1fr; }
     .about-card__portrait { width: 140px; height: 140px; }
+    .about-card__corner {
+      width: 16px;
+      height: 14px;
+    }
   }
 
   /* ===================== ROWS ===================== */
@@ -652,6 +874,8 @@ const letters = Array.from(wordmark);
 
     let raf = 0;
     let tx = 0, ty = 0, cx = 0, cy = 0;
+    let mouseX = 0, mouseY = 0;          // last cursor position (host coords)
+    const dust = Array.from(host.querySelectorAll<HTMLElement>('.dust'));
 
     const apply = () => {
       cx += (tx - cx) * 0.08;
@@ -669,6 +893,26 @@ const letters = Array.from(wordmark);
         el.style.transform =
           `translate3d(${(cx * -10 * factor).toFixed(2)}px, ${(cy * -8 * factor).toFixed(2)}px, ${z}px)`;
       });
+
+      // dust repel — push particles away from cursor within radius
+      const RADIUS = 130;
+      for (const d of dust) {
+        const r = d.getBoundingClientRect();
+        const hostR = host.getBoundingClientRect();
+        const dx = (r.left + r.width / 2) - (hostR.left + mouseX);
+        const dy = (r.top  + r.height / 2) - (hostR.top  + mouseY);
+        const dist = Math.hypot(dx, dy);
+        if (dist < RADIUS) {
+          const force = (1 - dist / RADIUS) * 60;
+          const ang = Math.atan2(dy, dx);
+          d.style.setProperty('--dust-px', (Math.cos(ang) * force).toFixed(2) + 'px');
+          d.style.setProperty('--dust-py', (Math.sin(ang) * force).toFixed(2) + 'px');
+        } else {
+          d.style.setProperty('--dust-px', '0px');
+          d.style.setProperty('--dust-py', '0px');
+        }
+      }
+
       if (Math.abs(tx - cx) + Math.abs(ty - cy) > 0.0008) {
         raf = requestAnimationFrame(apply);
       } else {
@@ -678,17 +922,65 @@ const letters = Array.from(wordmark);
 
     const onMove = (e: MouseEvent) => {
       const rect = host.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
       tx = ((e.clientX - rect.left) / rect.width)  * 2 - 1;
       ty = ((e.clientY - rect.top)  / rect.height) * 2 - 1;
       if (!raf) raf = requestAnimationFrame(apply);
     };
     const onLeave = () => {
       tx = 0; ty = 0;
+      // ease dust back home
+      for (const d of dust) {
+        d.style.setProperty('--dust-px', '0px');
+        d.style.setProperty('--dust-py', '0px');
+      }
       if (!raf) raf = requestAnimationFrame(apply);
     };
 
     host.addEventListener('mousemove', onMove);
     host.addEventListener('mouseleave', onLeave);
+
+    /* Scroll-tied wordmark parallax — wordmark scales + fades as user
+       scrolls past the hero, while the grid floor & beam recede further. */
+    const wordmark = host.querySelector<HTMLElement>('.wordmark');
+    const halo     = host.querySelector<HTMLElement>('.hero__halo');
+    const grid     = host.querySelector<HTMLElement>('.hero__grid');
+    const subtitle = host.querySelector<HTMLElement>('.hero__subtitle');
+    const search   = host.querySelector<HTMLElement>('.hero__search');
+    let scrollRaf = 0;
+    const onScroll = () => {
+      if (scrollRaf) return;
+      scrollRaf = requestAnimationFrame(() => {
+        scrollRaf = 0;
+        const heroH = host.offsetHeight || window.innerHeight;
+        const p = Math.min(1, Math.max(0, window.scrollY / (heroH * 0.95)));
+        if (wordmark) {
+          const scale = 1 - p * 0.18;
+          const ty    = p * -90;
+          wordmark.style.transform = `translate3d(0, ${ty}px, 60px) scale(${scale})`;
+          wordmark.style.opacity   = String(1 - p * 0.85);
+          wordmark.style.filter    = `blur(${(p * 8).toFixed(2)}px)`;
+        }
+        if (halo) {
+          halo.style.transform = `translateZ(-60px) scale(${1 + p * 0.5})`;
+          halo.style.opacity   = String(1 - p * 0.7);
+        }
+        if (grid) {
+          grid.style.opacity = String(0.55 - p * 0.55);
+        }
+        if (subtitle) {
+          subtitle.style.opacity   = String(1 - p * 1.6);
+          subtitle.style.transform = `translate3d(0, ${p * -40}px, 40px)`;
+        }
+        if (search) {
+          search.style.opacity   = String(1 - p * 1.6);
+          search.style.transform = `translate3d(0, ${p * -30}px, 60px)`;
+        }
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
 
     // tiny HUD clock
     const clockEl = host.querySelector<HTMLElement>('[data-clock]');

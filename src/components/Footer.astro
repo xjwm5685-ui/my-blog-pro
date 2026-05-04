@@ -1,5 +1,6 @@
 ---
 import { SITE_CONFIG } from '@/config';
+import Equalizer from './Equalizer.astro';
 const year = new Date().getFullYear();
 ---
 
@@ -47,6 +48,13 @@ const year = new Date().getFullYear();
     <div class="ftr__col ftr__brand">
       <a href="/" class="ftr__wordmark">{SITE_CONFIG.shortTitle}</a>
       <p class="ftr__tag">{SITE_CONFIG.subtitle}</p>
+      <div class="ftr__live">
+        <Equalizer />
+        <span class="ftr__live-text">
+          <span class="ftr__live-label">BROADCASTING</span>
+          <span class="ftr__live-since">EST · 2024</span>
+        </span>
+      </div>
     </div>
   </div>
 
@@ -107,6 +115,35 @@ const year = new Date().getFullYear();
     font-family: var(--font-cn);
     font-size: 0.85rem;
     margin: 0;
+  }
+
+  .ftr__live {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-top: 0.6rem;
+    padding: 0.45rem 0.9rem 0.45rem 0.6rem;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    width: fit-content;
+  }
+  .ftr__live-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+    font-family: var(--font-mono);
+  }
+  .ftr__live-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .ftr__live-since {
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    color: var(--text-muted);
   }
 
   .ftr__bottom {

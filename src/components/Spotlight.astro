@@ -1,0 +1,171 @@
+---
+/**
+ * Spotlight — toggle-able flashlight mode. Press F to engage.
+ * Page goes near-pitch-black with only a soft circular glow following
+ * the cursor. Press F again to exit.
+ *
+ * Has a faint visual cue (HUD chip) that shows when armed.
+ */
+---
+<div class="spot" data-spot aria-hidden="true">
+  <span class="spot__mask" data-spot-mask></span>
+</div>
+
+<div class="spot-hint" data-spot-hint aria-hidden="true">
+  <span class="spot-hint__key">F</span>
+  <span class="spot-hint__text" data-spot-hint-text>SPOTLIGHT</span>
+</div>
+
+<style>
+  .spot {
+    position: fixed;
+    inset: 0;
+    z-index: 7000;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 320ms var(--ease-soft), visibility 0s linear 320ms;
+    mix-blend-mode: multiply;
+  }
+  .spot.is-on {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 320ms var(--ease-soft);
+  }
+  .spot__mask {
+    --x: 50%;
+    --y: 50%;
+    --r: 220px;
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--x) var(--y),
+      transparent 0,
+      transparent calc(var(--r) * 0.55),
+      rgba(0, 0, 0, 0.6) calc(var(--r) * 0.78),
+      rgba(0, 0, 0, 0.94) var(--r),
+      rgba(0, 0, 0, 0.99) 130%);
+    transition: background-position 60ms linear;
+  }
+
+  .spot-hint {
+    position: fixed;
+    bottom: 1.4rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    z-index: 940;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.95rem 0.45rem 0.5rem;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 380ms var(--ease-soft), transform 380ms var(--ease-soft);
+  }
+  .spot-hint.is-shown {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .spot-hint__key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.05);
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  /* When armed, pulse the indicator */
+  .spot-hint.is-armed {
+    color: #6ee7a8;
+    border-color: rgba(110, 231, 168, 0.55);
+  }
+  .spot-hint.is-armed .spot-hint__key {
+    color: #6ee7a8;
+    border-color: rgba(110, 231, 168, 0.55);
+    box-shadow: 0 0 12px rgba(110, 231, 168, 0.45);
+    animation: spotHintPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes spotHintPulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(110, 231, 168, 0.35); }
+    50%      { box-shadow: 0 0 18px rgba(110, 231, 168, 0.85); }
+  }
+
+  @media (max-width: 720px) {
+    .spot, .spot-hint { display: none !important; }
+  }
+</style>
+
+<script>
+  function bootSpot() {
+    const root = document.querySelector<HTMLElement>('[data-spot]');
+    const mask = document.querySelector<HTMLElement>('[data-spot-mask]');
+    const hint = document.querySelector<HTMLElement>('[data-spot-hint]');
+    const text = document.querySelector<HTMLElement>('[data-spot-hint-text]');
+    if (!root || !mask || !hint || !text) return;
+
+    let armed = false;
+    let x = window.innerWidth / 2;
+    let y = window.innerHeight / 2;
+    let raf = 0;
+    let mx = x, my = y;
+
+    const tick = () => {
+      x += (mx - x) * 0.32;
+      y += (my - y) * 0.32;
+      mask.style.setProperty('--x', x + 'px');
+      mask.style.setProperty('--y', y + 'px');
+      raf = requestAnimationFrame(tick);
+    };
+
+    const onMove = (e: MouseEvent) => { mx = e.clientX; my = e.clientY; };
+
+    /* Show the hint after a beat to invite interaction */
+    window.setTimeout(() => hint.classList.add('is-shown'), 3000);
+
+    const setArmed = (next: boolean) => {
+      armed = next;
+      root.classList.toggle('is-on', armed);
+      hint.classList.toggle('is-armed', armed);
+      text.textContent = armed ? 'SPOTLIGHT · ON' : 'SPOTLIGHT';
+      if (armed) {
+        window.addEventListener('mousemove', onMove);
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(tick);
+      } else {
+        window.removeEventListener('mousemove', onMove);
+        cancelAnimationFrame(raf);
+      }
+    };
+
+    document.addEventListener('keydown', (e) => {
+      if (e.repeat) return;
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.key === 'f' || e.key === 'F') { e.preventDefault(); setArmed(!armed); }
+      if (e.key === 'Escape' && armed)    { e.preventDefault(); setArmed(false); }
+    });
+
+    document.addEventListener('astro:before-swap', () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('mousemove', onMove);
+    }, { once: true });
+  }
+  bootSpot();
+  document.addEventListener('astro:page-load', bootSpot);
+</script>

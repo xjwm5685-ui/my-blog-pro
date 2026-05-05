@@ -55,6 +55,9 @@
     const head = document.querySelector<HTMLElement>('[data-sp-head]');
     if (!bar || !head) return;
 
+    if ((bar as any).__bound) return;
+    (bar as any).__bound = true;
+
     let raf = 0;
     const update = () => {
       const max = (document.documentElement.scrollHeight - window.innerHeight) || 1;
@@ -67,6 +70,11 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
     update();
+    
+    document.addEventListener('astro:before-swap', () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    }, { once: true });
   }
   bootSP();
   document.addEventListener('astro:page-load', bootSP);

@@ -6,9 +6,11 @@ export type Post = CollectionEntry<'blog'>;
 // 获取所有文章并按日期排序
 export async function getAllPosts(): Promise<Post[]> {
   const posts = await getCollection('blog');
-  return posts.sort((a, b) => 
-    new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
-  );
+  return posts
+    .filter(post => !post.data.draft)
+    .sort((a, b) => 
+      new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
+    );
 }
 
 // 根据分类获取文章

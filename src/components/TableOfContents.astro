@@ -12,7 +12,14 @@ const visible = headings.filter(h => h.depth >= 2 && h.depth <= 3);
 
 {visible.length > 0 && (
   <nav class="toc" aria-label="Table of contents">
-    <span class="bracket-label toc__label">ON THIS PAGE</span>
+    <div class="toc__header">
+      <svg class="toc__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10" stroke-dasharray="2 4 8 4"></circle>
+        <line x1="12" y1="2" x2="12" y2="12"></line>
+        <circle cx="12" cy="12" r="3" fill="currentColor"></circle>
+      </svg>
+      <span class="bracket-label toc__label">ON THIS PAGE</span>
+    </div>
     <ol class="toc__list">
       {visible.map((h) => (
         <li class:list={['toc__item', `toc__item--d${h.depth}`]}>
@@ -34,6 +41,21 @@ const visible = headings.filter(h => h.depth >= 2 && h.depth <= 3);
     font-family: var(--font-cn);
   }
 
+  .toc__header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .toc__icon {
+    color: var(--beam-cool);
+    animation: scanRadar 4s linear infinite;
+    opacity: 0.8;
+  }
+  @keyframes scanRadar {
+    to { transform: rotate(360deg); }
+  }
+
   .toc__label {
     font-size: 0.66rem;
     letter-spacing: 0.32em;
@@ -43,9 +65,10 @@ const visible = headings.filter(h => h.depth >= 2 && h.depth <= 3);
     list-style: none;
     margin: 0;
     padding: 0;
-    border-left: 1px solid var(--border);
+    border-left: 1px dashed var(--border-strong);
     display: flex;
     flex-direction: column;
+    margin-left: 7px; /* Align with the center of the 16px radar icon */
   }
 
   .toc__item--d3 { padding-left: 1rem; }

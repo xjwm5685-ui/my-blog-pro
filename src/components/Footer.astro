@@ -5,6 +5,19 @@ const year = new Date().getFullYear();
 ---
 
 <footer class="ftr">
+  <!-- Giant Background Seal SVG -->
+  <svg class="ftr__seal" viewBox="0 0 400 400" fill="none" stroke="currentColor" aria-hidden="true">
+    <circle cx="200" cy="200" r="190" stroke-width="1" stroke-dasharray="2 6" opacity="0.15"/>
+    <circle cx="200" cy="200" r="140" stroke-width="0.5" opacity="0.2"/>
+    <circle cx="200" cy="200" r="90" stroke-width="1" stroke-dasharray="20 10 5 10" opacity="0.3"/>
+    <path d="M200 10 L200 390 M10 200 L390 200" stroke-width="0.5" opacity="0.1"/>
+    <path d="M60 60 L340 340 M60 340 L340 60" stroke-width="0.5" opacity="0.1"/>
+    <circle cx="200" cy="200" r="40" stroke-width="1.5" opacity="0.4"/>
+    <rect x="180" y="180" width="40" height="40" stroke-width="1" opacity="0.5" transform="rotate(45 200 200)"/>
+    <text x="200" y="32" text-anchor="middle" font-family="var(--font-mono)" font-size="12" letter-spacing="4" opacity="0.2" fill="currentColor" stroke="none">SYSTEM CORE</text>
+    <text x="200" y="376" text-anchor="middle" font-family="var(--font-mono)" font-size="12" letter-spacing="4" opacity="0.2" fill="currentColor" stroke="none">ONLINE</text>
+  </svg>
+
   <div class="ftr__top">
     <div class="ftr__col">
       <span class="bracket-label">FOLLOW</span>
@@ -66,13 +79,33 @@ const year = new Date().getFullYear();
 
 <style>
   .ftr {
+    position: relative;
     margin-top: var(--s-20);
     padding: var(--s-10) var(--shell-px) var(--s-6);
     border-top: 1px solid var(--border);
     background: linear-gradient(180deg, transparent, rgba(255,255,255,0.015));
+    overflow: hidden;
+  }
+
+  .ftr__seal {
+    position: absolute;
+    top: 50%;
+    right: -100px;
+    transform: translateY(-50%);
+    width: 600px;
+    height: 600px;
+    color: var(--text-faint);
+    pointer-events: none;
+    z-index: 0;
+    animation: slowSpin 120s linear infinite;
+  }
+  @keyframes slowSpin {
+    to { transform: translateY(-50%) rotate(360deg); }
   }
 
   .ftr__top {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: repeat(4, 1fr) 1.4fr;
     gap: 2.4rem;

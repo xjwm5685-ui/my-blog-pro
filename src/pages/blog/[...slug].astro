@@ -1,13 +1,12 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import Pagination from '@components/Pagination.astro';
 import ReadingProgress from '@components/ReadingProgress.astro';
-import { formatDate, getAdjacentPosts } from '@/utils/post';
+import { formatDate, getAdjacentPosts, getAllPosts } from '@/utils/post';
 import { SITE_CONFIG } from '@/config';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog');
+  const posts = await getAllPosts();
   return posts.map((post) => ({
     params: { slug: post.slug },
     props: { post }

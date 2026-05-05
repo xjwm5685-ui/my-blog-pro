@@ -79,6 +79,17 @@ const subtitle = SITE_CONFIG.subtitle;
   </div>
 
   <div class="pe__sub" data-pe-sub></div>
+
+  <!-- SKIP BUTTON -->
+  <button class="pe__skip" data-pe-skip aria-label="Skip entrance animation">
+    <span class="pe__skip-key">S</span>
+    <span class="pe__skip-label">SKIP</span>
+    <span class="pe__skip-line"></span>
+    <span class="pe__skip-arrow">→</span>
+  </button>
+
+  <!-- IMPACT INVERT FLASH -->
+  <div class="pe__invert" data-pe-invert></div>
 </div>
 
 <style>
@@ -91,8 +102,18 @@ const subtitle = SITE_CONFIG.subtitle;
     display: none;
     overflow: hidden;
   }
-  :global(body.entrance-needed) .pe { display: block; }
-  :global(body.entrance-fading)  .pe { opacity: 0; transition: opacity 700ms ease; }
+  :global(body.entrance-needed) .pe { display: block; pointer-events: auto; }
+  :global(body.entrance-fading)  .pe { opacity: 0; transition: opacity 700ms ease; pointer-events: none; }
+
+  .pe__invert {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    mix-blend-mode: difference;
+    opacity: 0;
+    pointer-events: none;
+    will-change: opacity;
+  }
 
   .pe__shake {
     position: absolute;
@@ -412,6 +433,84 @@ const subtitle = SITE_CONFIG.subtitle;
     .pe__canvas, .pe__chrom, .pe__bar, .pe__sub { display: none; }
     .pe__hud--bl, .pe__hud--br { display: none; }
     .pe__title { font-size: 0.72rem; }
+    .pe__skip { display: none; }
+  }
+
+  /* Skip Button Styles */
+  .pe__skip {
+    position: absolute;
+    bottom: 2.5rem;
+    right: 2.5rem;
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem 0.5rem 0.4rem 0.4rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-pill);
+    color: var(--text-soft);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.25em;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: all 300ms var(--ease-out);
+    opacity: 0;
+    animation: peSkipIn 1000ms var(--ease-out) 1000ms forwards;
+  }
+  @keyframes peSkipIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .pe__skip-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 0 rgba(255, 255, 255, 0.15), 0 4px 10px rgba(0, 0, 0, 0.5);
+    letter-spacing: 0;
+    transition: all 300ms var(--ease-out);
+  }
+  .pe__skip-label { padding-left: 0.25rem; }
+  .pe__skip:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--border-bright);
+    color: var(--text);
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(190, 210, 255, 0.2);
+  }
+  .pe__skip:hover .pe__skip-key {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 2px 0 rgba(255, 255, 255, 0.3), 0 0 15px rgba(255, 255, 255, 0.4);
+    transform: translateY(-1px);
+  }
+  .pe__skip:active .pe__skip-key {
+    transform: translateY(1px);
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0.3);
+  }
+  .pe__skip-line {
+    width: 20px;
+    height: 1px;
+    background: var(--text-dim);
+    transition: width 300ms var(--ease-out), background 300ms var(--ease-out);
+  }
+  .pe__skip:hover .pe__skip-line {
+    width: 40px;
+    background: var(--beam-cool);
+  }
+  .pe__skip-arrow {
+    transition: transform 300ms var(--ease-out);
+  }
+  .pe__skip:hover .pe__skip-arrow {
+    transform: translateX(4px);
   }
 </style>
 
@@ -504,7 +603,7 @@ const subtitle = SITE_CONFIG.subtitle;
     const offCtx = off.getContext('2d', { willReadFrequently: true });
     if (!offCtx) return;
     offCtx.fillStyle = '#fff';
-    offCtx.font = `200 ${fontSize}px Geist, sans-serif`;
+    offCtx.font = `700 ${fontSize}px Syncopate, sans-serif`;
     offCtx.textBaseline = 'middle';
     offCtx.textAlign = 'left';
     const shellPad = Math.max(w * 0.04, 16);
@@ -648,6 +747,40 @@ const subtitle = SITE_CONFIG.subtitle;
       });
     }
 
+    const skipBtn = root.querySelector<HTMLElement>('[data-pe-skip]');
+    
+    function performSkip() {
+      if (dismissed) return;
+      dismissed = true;
+      revealed = true;
+      sessionStorage.setItem('wyhef_entered', '1');
+      document.body.classList.add('entrance-revealing');
+      document.body.classList.add('entrance-fading');
+      window.clearInterval(bootTimer);
+      window.clearInterval(traceTimer);
+      window.clearInterval(clockTimer);
+      cancelAnimationFrame(raf);
+      
+      window.setTimeout(() => {
+        document.body.classList.remove('entrance-needed');
+        document.body.classList.remove('entrance-fading');
+        root.parentNode?.removeChild(root);
+      }, 700);
+    }
+
+    if (skipBtn) {
+      skipBtn.addEventListener('click', performSkip);
+    }
+
+    // Global 'S' key listener for skip
+    const onKeydown = (e: KeyboardEvent) => {
+      if ((e.key === 's' || e.key === 'S') && !dismissed) {
+        performSkip();
+        window.removeEventListener('keydown', onKeydown);
+      }
+    };
+    window.addEventListener('keydown', onKeydown);
+
     function draw(now: number) {
       const elapsed = now - t0;
 
@@ -698,6 +831,53 @@ const subtitle = SITE_CONFIG.subtitle;
         const t = (elapsed - T_BOOT_END) / (T_WARP_END - T_BOOT_END);
         const ec = easeInCubic(t);
 
+        /* Seam gets intensely bright and thick, ready to explode */
+        const maxW = Math.min(w * 0.85, 760);
+        ctx!.fillStyle = `rgba(255, 255, 255, ${Math.min(1, 0.95 + ec * 2)})`;
+        ctx!.shadowBlur = 40 + ec * 80;
+        ctx!.shadowColor = 'rgba(190, 210, 255, 1)';
+        ctx!.fillRect((w - maxW) / 2, h / 2 - 2, maxW, 4 + ec * 4);
+        ctx!.shadowBlur = 0;
+
+        /* Intense Warp streaks */
+        if (Math.random() < 0.4 + ec * 0.6) {
+          spawnStreak(now);
+          if (ec > 0.5) spawnStreak(now); // spawn more as it gets faster
+        }
+
+        ctx!.lineCap = 'round';
+        for (let i = streaks.length - 1; i >= 0; i--) {
+          const s = streaks[i];
+          const st = (now - s.born) / s.life;
+          if (st > 1) { streaks.splice(i, 1); continue; }
+          const stE = easeInCubic(st);
+          
+          /* Hyper-speed radial lines from edges to center */
+          const r1 = lerp(s.rStart, 0, stE);
+          const r2 = lerp(s.rStart, 0, Math.max(0, stE - 0.2));
+
+          ctx!.beginPath();
+          ctx!.moveTo(cxOrigin + Math.cos(s.a) * r1, cyOrigin + Math.sin(s.a) * r1);
+          ctx!.lineTo(cxOrigin + Math.cos(s.a) * r2, cyOrigin + Math.sin(s.a) * r2);
+          
+          ctx!.strokeStyle = s.hue === 'w' ? `rgba(255,255,255,${1 - st})` : `rgba(190,210,255,${1 - st})`;
+          ctx!.lineWidth = s.hue === 'w' ? 2 : 4;
+          ctx!.stroke();
+        }
+
+        /* Screen shake builds up */
+        if (ec > 0.5) triggerShake(50, ec * 8);
+
+        const pct = 38 + Math.floor(ec * 62);
+        barFill!.style.width = pct + '%';
+        barLbl!.textContent = `LOADING · ${pct}%`;
+        
+        /* Pre-impact flash buildup */
+        if (t > 0.9) {
+           ctx!.fillStyle = `rgba(255, 255, 255, ${(t - 0.9) * 10})`;
+           ctx!.fillRect(0, 0, w, h);
+        }
+
         /* Spawn a few new streaks per frame, ramping up */
         const spawnRate = Math.floor(2 + ec * 14);
         for (let i = 0; i < spawnRate; i++) spawnStreak(now);
@@ -737,9 +917,9 @@ const subtitle = SITE_CONFIG.subtitle;
         ctx!.fillStyle = `rgba(255, 255, 255, ${(0.6 + ec * 0.35).toFixed(3)})`;
         ctx!.fillRect((w - seamW) / 2, (h - seamH) / 2, seamW, seamH);
 
-        const pct = Math.floor(38 + t * 60);
-        barFill!.style.width = pct + '%';
-        barLbl!.textContent = `LOADING · ${pct.toString().padStart(2, '0')}%`;
+        const warpPct = Math.floor(38 + t * 60);
+        barFill!.style.width = warpPct + '%';
+        barLbl!.textContent = `LOADING · ${warpPct.toString().padStart(2, '0')}%`;
       }
 
       /* ============== ACT 2 · IMPACT (2.8–3.2s) ============== */
@@ -747,16 +927,72 @@ const subtitle = SITE_CONFIG.subtitle;
         const t = (elapsed - T_WARP_END) / (T_IMPACT_END - T_WARP_END);
         if (t < 0.05 && !(root as any).__flashed1) {
           (root as any).__flashed1 = true;
-          /* impact flash: slow rise, brief hold, long fade */
-          triggerFlash(1.0, 260, 80, 520);
-          triggerShake(420, 20);
+          /* impact flash: aggressive peak, explosive shake */
+          triggerFlash(1.0, 50, 200, 800);
+          triggerShake(800, 45); // Increased shake intensity
+          
+          /* Invert Flash */
+          const invert = root.querySelector<HTMLElement>('[data-pe-invert]');
+          if (invert) {
+            invert.style.transition = 'none';
+            invert.style.opacity = '1';
+            window.setTimeout(() => {
+              invert.style.transition = 'opacity 0.4s ease-out';
+              invert.style.opacity = '0';
+            }, 60);
+          }
+
+          /* Camera Scale Punch */
+          shake!.style.transformOrigin = 'center center';
+          shake!.style.transform = 'scale(1.15)';
+          window.setTimeout(() => {
+            shake!.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+            shake!.style.transform = 'scale(1)';
+          }, 50);
+
           /* hide the title — now the canvas takes over */
           root.classList.add('is-titlegone');
           barFill!.style.width = '100%';
-          barLbl!.textContent  = 'LOADING · 100%';
+          barLbl!.textContent  = 'SYSTEM OVERRIDE · 100%';
+          barLbl!.style.color = '#ff5d6e';
+          
+          /* Chromatic Aberration Spike */
+          const chromR = root.querySelector<HTMLElement>('[data-pe-chrom-r]')!;
+          const chromB = root.querySelector<HTMLElement>('[data-pe-chrom-b]')!;
+          if (chromR && chromB) {
+            chromR.style.opacity = '1';
+            chromB.style.opacity = '1';
+            chromR.style.setProperty('--cx', '40px');
+            chromB.style.setProperty('--cx', '-40px');
+            window.setTimeout(() => {
+              chromR.style.transition = 'opacity 1s, transform 1s';
+              chromB.style.transition = 'opacity 1s, transform 1s';
+              chromR.style.opacity = '0';
+              chromB.style.opacity = '0';
+              chromR.style.setProperty('--cx', '0px');
+              chromB.style.setProperty('--cx', '0px');
+            }, 100);
+          }
         }
 
-        /* Streaks scatter outward (briefly drawn as the warp continues collapsing) */
+        /* Screen fracture lines */
+        ctx!.lineWidth = 1.5;
+        ctx!.strokeStyle = `rgba(255,255,255,${1 - t})`;
+        for(let i=0; i<8; i++) {
+          ctx!.beginPath();
+          ctx!.moveTo(w/2, h/2);
+          ctx!.lineTo(w/2 + (Math.random()-0.5)*w, h/2 + (Math.random()-0.5)*h);
+          ctx!.stroke();
+        }
+
+        /* Huge Expanding EMP Shockwave */
+        ctx!.strokeStyle = `rgba(255, 255, 255, ${(1 - t) * 0.9})`;
+        ctx!.lineWidth = 8 + (1 - t) * 20;
+        ctx!.beginPath();
+        ctx!.arc(w/2, h/2, t * w * 0.8, 0, Math.PI * 2);
+        ctx!.stroke();
+
+        /* Streaks scatter outward violently */
         for (let i = streaks.length - 1; i >= 0; i--) {
           const s = streaks[i];
           const age = Math.min(1, (now - s.born) / s.life);
@@ -766,7 +1002,7 @@ const subtitle = SITE_CONFIG.subtitle;
           const y = h / 2 + Math.sin(s.a) * r;
           ctx!.fillStyle = `rgba(255, 255, 255, ${(1 - age).toFixed(3)})`;
           ctx!.beginPath();
-          ctx!.arc(x, y, 1.4, 0, Math.PI * 2);
+          ctx!.arc(x, y, 2.5, 0, Math.PI * 2);
           ctx!.fill();
         }
       }
@@ -774,29 +1010,53 @@ const subtitle = SITE_CONFIG.subtitle;
       /* ============== ACT 3 · MATERIALIZE (3.2–4.8s) ============== */
       else if (elapsed < T_MAT_END) {
         const t = (elapsed - T_IMPACT_END) / (T_MAT_END - T_IMPACT_END);
+        
+        /* Electromagnetic pulse rings */
+        if (t < 0.8) {
+           ctx!.strokeStyle = `rgba(190, 210, 255, ${(0.8 - t)})`;
+           ctx!.lineWidth = 2;
+           ctx!.beginPath();
+           ctx!.arc(w/2, h/2, t * Math.max(w, h), 0, Math.PI * 2);
+           ctx!.stroke();
+        }
+
+        ctx!.beginPath(); // Batch drawing for white particles
         for (const p of particles) {
+          if (p.hue !== 'w') continue;
           const local = (t - p.delay) / Math.max(0.1, p.travel * 0.8);
           if (local < 0) continue;
           const e = easeOutCubic(Math.min(1, local));
 
-          /* spiral component — radius decreases with progress */
-          const angle = p.spiralA + e * 4.2;
-          const rad   = (1 - e) * p.spiralR;
+          const angle = p.spiralA + e * 8.0;
+          const rad   = (1 - e) * p.spiralR * 2.5;
 
-          /* base interpolation from origin to target */
-          const baseX = lerp(p.sx, p.tx, e);
-          const baseY = lerp(p.sy, p.ty, e);
-          p.cx = baseX + Math.cos(angle) * rad;
-          p.cy = baseY + Math.sin(angle) * rad;
+          p.cx = lerp(p.sx, p.tx, e) + Math.cos(angle) * rad;
+          p.cy = lerp(p.sy, p.ty, e) + Math.sin(angle) * rad;
 
-          const a = (0.85 * Math.min(1, local + 0.2)).toFixed(3);
-          ctx!.fillStyle = p.hue === 'w'
-            ? `rgba(255, 255, 255, ${a})`
-            : `rgba(190, 210, 255, ${a})`;
-          ctx!.beginPath();
-          ctx!.arc(p.cx, p.cy, 1.3, 0, Math.PI * 2);
-          ctx!.fill();
+          ctx!.moveTo(p.cx, p.cy);
+          ctx!.arc(p.cx, p.cy, 1.8, 0, Math.PI * 2);
         }
+        ctx!.fillStyle = `rgba(255, 255, 255, 0.85)`;
+        ctx!.fill();
+
+        ctx!.beginPath(); // Batch drawing for blue particles
+        for (const p of particles) {
+          if (p.hue !== 'b') continue;
+          const local = (t - p.delay) / Math.max(0.1, p.travel * 0.8);
+          if (local < 0) continue;
+          const e = easeOutCubic(Math.min(1, local));
+
+          const angle = p.spiralA + e * 8.0;
+          const rad   = (1 - e) * p.spiralR * 2.5;
+
+          p.cx = lerp(p.sx, p.tx, e) + Math.cos(angle) * rad;
+          p.cy = lerp(p.sy, p.ty, e) + Math.sin(angle) * rad;
+
+          ctx!.moveTo(p.cx, p.cy);
+          ctx!.arc(p.cx, p.cy, 1.8, 0, Math.PI * 2);
+        }
+        ctx!.fillStyle = `rgba(190, 210, 255, 0.85)`;
+        ctx!.fill();
       }
 
       /* ============== ACT 4 · LOCK-IN (4.8–5.4s) ============== */
@@ -804,9 +1064,53 @@ const subtitle = SITE_CONFIG.subtitle;
         const t = (elapsed - T_MAT_END) / (T_LOCK_END - T_MAT_END);
         if (!(root as any).__flashed2) {
           (root as any).__flashed2 = true;
-          /* lock-in flash: even softer rise, short hold, long fade */
-          triggerFlash(0.85, 320, 100, 520);
-          triggerShake(380, 14);
+          /* lock-in flash: intense, sharp, short */
+          triggerFlash(1.0, 40, 50, 600);
+          triggerShake(500, 25);
+          
+          /* Invert Flash 2 */
+          const invert = root.querySelector<HTMLElement>('[data-pe-invert]');
+          if (invert) {
+            invert.style.transition = 'none';
+            invert.style.opacity = '1';
+            window.setTimeout(() => {
+              invert.style.transition = 'opacity 0.8s ease-out';
+              invert.style.opacity = '0';
+            }, 50);
+          }
+
+          /* Camera Scale Punch 2 */
+          shake!.style.transformOrigin = 'center center';
+          shake!.style.transform = 'scale(0.85)';
+          window.setTimeout(() => {
+            shake!.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+            shake!.style.transform = 'scale(1)';
+          }, 50);
+          
+          /* Chromatic Aberration Spike 2 */
+          const chromR = root.querySelector<HTMLElement>('[data-pe-chrom-r]')!;
+          const chromB = root.querySelector<HTMLElement>('[data-pe-chrom-b]')!;
+          if (chromR && chromB) {
+            chromR.style.transition = 'none';
+            chromB.style.transition = 'none';
+            chromR.style.opacity = '1';
+            chromB.style.opacity = '1';
+            chromR.style.setProperty('--cx', '30px');
+            chromB.style.setProperty('--cx', '-30px');
+            chromR.style.setProperty('--cy', '15px');
+            chromB.style.setProperty('--cy', '-15px');
+            window.setTimeout(() => {
+              chromR.style.transition = 'opacity 0.8s, transform 0.8s';
+              chromB.style.transition = 'opacity 0.8s, transform 0.8s';
+              chromR.style.opacity = '0';
+              chromB.style.opacity = '0';
+              chromR.style.setProperty('--cx', '0px');
+              chromB.style.setProperty('--cx', '0px');
+              chromR.style.setProperty('--cy', '0px');
+              chromB.style.setProperty('--cy', '0px');
+            }, 50);
+          }
+
           /* subtitle: render as per-char spans, stagger fade-in */
           if (subtitle) {
             const chars = Array.from(subtitle);
@@ -819,40 +1123,87 @@ const subtitle = SITE_CONFIG.subtitle;
               return s;
             });
             spans.forEach((s, i) => {
-              window.setTimeout(() => s.classList.add('is-in'), i * 55);
+              window.setTimeout(() => s.classList.add('is-in'), i * 35); // Faster sub reveal
             });
           }
         }
 
+        /* Lock-in Expanding EMP Shockwave */
+        ctx!.strokeStyle = `rgba(190, 210, 255, ${(1 - t) * 0.8})`;
+        ctx!.lineWidth = 4 + (1 - t) * 15;
+        ctx!.beginPath();
+        ctx!.arc(cxOrigin, cyOrigin, t * w * 0.6, 0, Math.PI * 2);
+        ctx!.stroke();
+
+        /* Shockwave shrinking */
+        const scale = 1.0 + (1 - easeOutCubic(t)) * 0.5;
+        const r = 1.8 - t * 0.5;
+        const a = (1 - t * 0.2).toFixed(3);
+        
+        ctx!.beginPath();
         for (const p of particles) {
-          p.cx = p.tx;
-          p.cy = p.ty;
-          const r = 1.6 - t * 0.6;
-          const a = (1 - t * 0.4).toFixed(3);
-          ctx!.fillStyle = p.hue === 'w'
-            ? `rgba(255, 255, 255, ${a})`
-            : `rgba(190, 210, 255, ${a})`;
-          ctx!.beginPath();
+          if (p.hue !== 'w') continue;
+          p.cx = cxOrigin + (p.tx - cxOrigin) * scale;
+          p.cy = cyOrigin + (p.ty - cyOrigin) * scale;
+          ctx!.moveTo(p.cx, p.cy);
           ctx!.arc(p.cx, p.cy, r, 0, Math.PI * 2);
-          ctx!.fill();
         }
+        ctx!.fillStyle = `rgba(255, 255, 255, ${a})`;
+        ctx!.fill();
+
+        ctx!.beginPath();
+        for (const p of particles) {
+          if (p.hue !== 'b') continue;
+          p.cx = cxOrigin + (p.tx - cxOrigin) * scale;
+          p.cy = cyOrigin + (p.ty - cyOrigin) * scale;
+          ctx!.moveTo(p.cx, p.cy);
+          ctx!.arc(p.cx, p.cy, r, 0, Math.PI * 2);
+        }
+        ctx!.fillStyle = `rgba(190, 210, 255, ${a})`;
+        ctx!.fill();
       }
 
       /* ============== ACT 5 · DISPERSE + REVEAL (5.4–6.5s) ============== */
       else if (elapsed < T_END) {
         const t = (elapsed - T_LOCK_END) / (T_END - T_LOCK_END);
         const ee = easeOutCubic(t);
-        const dist = ee * 800;
+        const dist = ee * 1200; // Increased scatter distance
 
+        /* Laser sweep line */
+        const laserY = h * ee;
+        ctx!.fillStyle = 'rgba(190, 210, 255, 0.8)';
+        ctx!.fillRect(0, laserY, w, 2);
+
+        ctx!.beginPath(); // Locked particles
         for (const p of particles) {
-          p.cx = p.tx + Math.cos(p.final) * dist;
-          p.cy = p.ty + Math.sin(p.final) * dist;
-          const a = ((1 - t) * 0.85).toFixed(3);
+          if (p.ty <= laserY || p.hue !== 'w') continue;
+          ctx!.moveTo(p.tx, p.ty);
+          ctx!.arc(p.tx, p.ty, 1.3, 0, Math.PI * 2);
+        }
+        ctx!.fillStyle = `rgba(255, 255, 255, 0.8)`;
+        ctx!.fill();
+
+        ctx!.beginPath();
+        for (const p of particles) {
+          if (p.ty <= laserY || p.hue !== 'b') continue;
+          ctx!.moveTo(p.tx, p.ty);
+          ctx!.arc(p.tx, p.ty, 1.3, 0, Math.PI * 2);
+        }
+        ctx!.fillStyle = `rgba(190, 210, 255, 0.8)`;
+        ctx!.fill();
+
+        // Exploding particles (drawn individually because they have different alpha based on age)
+        for (const p of particles) {
+          if (p.ty > laserY) continue;
+          const age = Math.min(1, (laserY - p.ty) / (h * 0.4));
+          p.cx = p.tx + Math.cos(p.final) * dist * age;
+          p.cy = p.ty + Math.sin(p.final) * dist * age;
+          const a = ((1 - age) * 0.85).toFixed(3);
           ctx!.fillStyle = p.hue === 'w'
             ? `rgba(255, 255, 255, ${a})`
             : `rgba(190, 210, 255, ${a})`;
           ctx!.beginPath();
-          ctx!.arc(p.cx, p.cy, 1.0, 0, Math.PI * 2);
+          ctx!.arc(p.cx, p.cy, 1.5, 0, Math.PI * 2);
           ctx!.fill();
         }
 

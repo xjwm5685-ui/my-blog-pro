@@ -1,0 +1,199 @@
+---
+// Starfield.astro - Deep space parallax starfield background
+---
+<canvas id="starfield" aria-hidden="true"></canvas>
+
+<style>
+  #starfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -2; /* Sits behind everything, including ambient glow */
+    pointer-events: none;
+    background: transparent;
+  }
+</style>
+
+<script>
+  function initStarfield() {
+    const canvas = document.getElementById('starfield') as HTMLCanvasElement;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    const stars: { x: number, y: number, z: number, r: number, a: number, twinkle: number }[] = [];
+    // Adjust density based on screen size
+    const numStars = Math.floor((width * height) / 2500); 
+
+    for (let i = 0; i < numStars; i++) {
+      stars.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        z: Math.random() * 4 + 1, // Depth for parallax (1 = close, 5 = far)
+        r: Math.random() * 1.2 + 0.3, // Radius
+        a: Math.random(), // Alpha
+        twinkle: Math.random() * 0.03 + 0.005 // Twinkle speed
+      });
+    }
+
+    let mx = 0;
+    let my = 0;
+    let tx = 0;
+    let ty = 0;
+    
+    const onMove = (e: MouseEvent) => {
+      // Calculate target mouse offset from center
+      tx = (e.clientX - width / 2) * 0.1;
+      ty = (e.clientY - height / 2) * 0.1;
+    };
+    
+    window.addEventListener('mousemove', onMove, { passive: true });
+
+    let rafId: number;
+
+    // Meteor Shower System
+    type Meteor = { x: number, y: number, length: number, speed: number, angle: number, life: number, size: number, hue: string };
+    const meteors: Meteor[] = [];
+    let showerBurstTimer = 0;
+    let isBursting = false;
+
+    function spawnMeteor(isBurst = false) {
+      const angle = (Math.random() * Math.PI / 6) + Math.PI / 6; // Down-right angle
+      meteors.push({
+        x: Math.random() * width * 1.5 - width * 0.2, // Spawn wider to cover angle
+        y: -100,
+        length: Math.random() * 150 + (isBurst ? 100 : 50),
+        speed: Math.random() * 15 + (isBurst ? 25 : 15),
+        angle: angle,
+        life: 1.0,
+        size: Math.random() * 1.5 + 0.5,
+        hue: Math.random() > 0.5 ? '255, 255, 255' : '190, 210, 255' // White or Cool Blue
+      });
+    }
+
+    function render(time: number) {
+      ctx.clearRect(0, 0, width, height);
+      
+      // Smoothly interpolate mouse movement
+      mx += (tx - mx) * 0.05;
+      my += (ty - my) * 0.05;
+
+      // Render base stars
+      stars.forEach(star => {
+        // Twinkle logic
+        star.a += star.twinkle;
+        if (star.a > 1 || star.a < 0.1) {
+          star.twinkle = -star.twinkle;
+        }
+
+        // Apply mouse parallax and constant slow upward drift
+        let px = star.x - (mx / star.z);
+        let py = star.y - (my / star.z) - (time * 0.015 / star.z);
+        
+        // Wrap around edges
+        px = ((px % width) + width) % width;
+        py = ((py % height) + height) % height;
+
+        ctx.beginPath();
+        ctx.arc(px, py, star.r, 0, Math.PI * 2);
+        
+        // Core color: extremely faint cool blue
+        ctx.fillStyle = `rgba(190, 210, 255, ${Math.max(0, star.a)})`;
+        
+        // Add subtle glow to larger/closer stars
+        if (star.z < 2 && star.a > 0.6) {
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = 'rgba(190, 210, 255, 0.8)';
+        } else {
+          ctx.shadowBlur = 0;
+        }
+        
+        ctx.fill();
+      });
+
+      // Shower Burst Logic
+      showerBurstTimer++;
+      if (showerBurstTimer > 600 && Math.random() < 0.005) { // Trigger burst approx every 10+ seconds
+        isBursting = true;
+        showerBurstTimer = 0;
+      }
+      
+      if (isBursting) {
+        if (showerBurstTimer > 45) { // Burst lasts for ~45 frames
+          isBursting = false;
+        } else if (Math.random() < 0.4) { // High spawn rate during burst
+          spawnMeteor(true);
+        }
+      } else if (Math.random() < 0.008) { // Normal ambient spawn rate
+        spawnMeteor(false);
+      }
+
+      // Render Meteors
+      ctx.lineCap = 'round';
+      for (let i = meteors.length - 1; i >= 0; i--) {
+        const m = meteors[i];
+        m.x += Math.cos(m.angle) * m.speed;
+        m.y += Math.sin(m.angle) * m.speed;
+        m.life -= 0.012;
+
+        if (m.life <= 0 || m.x > width + m.length || m.y > height + m.length) {
+          meteors.splice(i, 1);
+          continue;
+        }
+
+        const tailX = m.x - Math.cos(m.angle) * m.length;
+        const tailY = m.y - Math.sin(m.angle) * m.length;
+
+        // Draw glowing head
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, m.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${m.hue}, ${m.life})`;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = `rgba(${m.hue}, 0.9)`;
+        ctx.fill();
+
+        // Draw fading tail gradient
+        const grad = ctx.createLinearGradient(m.x, m.y, tailX, tailY);
+        grad.addColorStop(0, `rgba(${m.hue}, ${m.life * 0.8})`);
+        grad.addColorStop(1, `rgba(${m.hue}, 0)`);
+
+        ctx.beginPath();
+        ctx.moveTo(m.x, m.y);
+        ctx.lineTo(tailX, tailY);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = m.size * 0.8;
+        ctx.stroke();
+        
+        ctx.shadowBlur = 0; // reset
+      }
+
+      rafId = requestAnimationFrame(render);
+    }
+
+    rafId = requestAnimationFrame(render);
+
+    const onResize = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    };
+    window.addEventListener('resize', onResize);
+
+    document.addEventListener('astro:before-swap', () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('resize', onResize);
+    }, { once: true });
+  }
+
+  initStarfield();
+  document.addEventListener('astro:page-load', initStarfield);
+</script>

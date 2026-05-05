@@ -182,7 +182,7 @@ const letters = Array.from(wordmark);
         <span class="bracket-label" data-reveal>LATEST</span>
         <h2 class="block__title" data-reveal style="--reveal-delay: 80ms">最新文章</h2>
       </div>
-      <a class="pill pill--ghost" href="/blog" data-reveal style="--reveal-delay: 160ms">
+      <a class="pill pill--ghost" href="/blog" data-reveal style="--reveal-delay: 160ms;">
         EXPLORE MORE <span class="arrow">↗</span>
       </a>
     </header>
@@ -210,7 +210,7 @@ const letters = Array.from(wordmark);
   <section class="block shell about-strip" data-section-name="[ WHO ]">
     <span class="bracket-label" data-reveal>WHO</span>
 
-    <div class="about-card" data-reveal data-tilt data-tilt-max="5" style="--reveal-delay: 100ms">
+    <div class="about-card" data-reveal data-tilt data-tilt-max="10" style="--reveal-delay: 100ms">
       <div class="about-card__portrait">
         <img src={SITE_CONFIG.avatar} alt={SITE_CONFIG.author} loading="lazy" />
       </div>
@@ -458,10 +458,10 @@ const letters = Array.from(wordmark);
      transforming the text itself (which Chrome can't antialias through). */
   .wordmark {
     position: relative;
-    font-family: var(--font-display);
-    font-weight: 200;
-    font-size: clamp(5rem, 18vw, 17rem);
-    letter-spacing: -0.04em;
+    font-family: var(--font-brand);
+    font-weight: 700;
+    font-size: clamp(4rem, 16vw, 15rem);
+    letter-spacing: -0.02em;
     line-height: 0.92;
     color: #ffffff;
     margin: 0;
@@ -603,6 +603,8 @@ const letters = Array.from(wordmark);
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 1.5rem;
+    perspective: 1000px;
+    transform-style: preserve-3d;
   }
   .block__head--row > div { display: flex; flex-direction: column; gap: 0.85rem; }
 
@@ -630,18 +632,27 @@ const letters = Array.from(wordmark);
     flex-wrap: wrap;
     gap: 0.45em;
     line-height: 1.2;
+    perspective: 1000px;
+    transform-style: preserve-3d;
   }
   .journey__word {
     position: relative;
     display: inline-block;
     color: var(--text);
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(12px) translateZ(-40px) rotateX(-15deg);
     filter: blur(8px);
     transition:
       opacity   900ms cubic-bezier(0.16, 1, 0.3, 1),
       transform 900ms cubic-bezier(0.16, 1, 0.3, 1),
-      filter    900ms cubic-bezier(0.16, 1, 0.3, 1);
+      filter    900ms cubic-bezier(0.16, 1, 0.3, 1),
+      text-shadow 300ms ease;
+  }
+  .journey__word:hover {
+    transform: translateY(-4px) translateZ(20px) scale(1.05) !important;
+    text-shadow: 0 10px 30px rgba(190, 210, 255, 0.4);
+    color: #fff;
+    transition-duration: 300ms;
   }
   .journey__word:nth-of-type(1) { transition-delay: 200ms; }
   .journey__word:nth-of-type(2) { transition-delay: 700ms; }
@@ -698,7 +709,7 @@ const letters = Array.from(wordmark);
   /* All triggered by the existing data-reveal IO */
   .block__title--journey.is-visible .journey__word {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0) rotateX(0);
     filter: blur(0);
   }
   .block__title--journey.is-visible .journey__word::after {
@@ -746,9 +757,18 @@ const letters = Array.from(wordmark);
     background: var(--bg-card);
     border: 1px solid var(--border);
     overflow: visible;
-    transition: border-color var(--dur) var(--ease-soft);
+    transition: 
+      border-color var(--dur) var(--ease-soft),
+      transform 400ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow var(--dur) var(--ease-soft);
   }
-  .about-card:hover { border-color: var(--border-strong); }
+  .about-card:hover { 
+    border-color: var(--border-bright); 
+    box-shadow: 
+      0 30px 60px -20px rgba(0, 0, 0, 0.8),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+      0 10px 40px -10px rgba(190, 210, 255, 0.15);
+  }
 
   .about-card__portrait {
     width: 180px;
@@ -756,6 +776,11 @@ const letters = Array.from(wordmark);
     border: 1px solid var(--border);
     overflow: hidden;
     background: var(--bg-elev);
+    transition: transform var(--dur) var(--ease-soft), box-shadow var(--dur) var(--ease-soft);
+  }
+  .about-card:hover .about-card__portrait {
+    transform: scale(1.05);
+    box-shadow: -20px 20px 40px -10px rgba(0,0,0,0.8);
   }
   .about-card__portrait img {
     width: 100%;
@@ -771,6 +796,10 @@ const letters = Array.from(wordmark);
     flex-direction: column;
     justify-content: center;
     gap: 0.85rem;
+    transition: transform var(--dur) var(--ease-soft);
+  }
+  .about-card:hover .about-card__copy {
+    transform: translateX(5px);
   }
 
   .about-card__name {
@@ -807,6 +836,10 @@ const letters = Array.from(wordmark);
     flex-wrap: wrap;
     gap: 0.6rem;
     margin-top: 0.4rem;
+    transition: transform var(--dur) var(--ease-soft);
+  }
+  .about-card:hover .about-card__ctas {
+    transform: translateX(5px);
   }
 
   .about-card__corner {
@@ -819,7 +852,8 @@ const letters = Array.from(wordmark);
     pointer-events: none;
     transition:
       opacity var(--dur) var(--ease-soft),
-      border-color var(--dur) var(--ease-soft);
+      border-color var(--dur) var(--ease-soft),
+      transform var(--dur) var(--ease-soft);
   }
   .about-card:hover .about-card__corner {
     opacity: 0.68;

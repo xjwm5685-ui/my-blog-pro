@@ -8,6 +8,7 @@ import HudLive from '@components/HudLive.astro';
 import GlitchAlert from '@components/GlitchAlert.astro';
 import SectionIndicator from '@components/SectionIndicator.astro';
 import Spotlight from '@components/Spotlight.astro';
+import Starfield from '@components/Starfield.astro';
 import { ViewTransitions } from 'astro:transitions';
 import '@/styles/global.css';
 import { getSEO, type SEOProps } from '@/utils/seo';
@@ -62,8 +63,10 @@ const hasTOC = headings && headings.length > 0;
 </head>
 
 <body>
+  <Starfield />
   <Spotlight />
   <span class="scanlines" aria-hidden="true"></span>
+  <div class="ambient-glow" data-ambient-glow aria-hidden="true"></div>
   <ScrollProgress />
   <Cursor />
   <HudLive />
@@ -106,7 +109,7 @@ const hasTOC = headings && headings.length > 0;
 
     /* ---- Magnetic pills — gentle pull toward cursor on hover ---- */
     function bindMagnetic() {
-      document.querySelectorAll<HTMLElement>('.pill, .row__cta .pill, .nav__cta').forEach((el) => {
+      document.querySelectorAll<HTMLElement>('.pill, .nav__cta').forEach((el) => {
         if ((el as any).__mag) return;
         (el as any).__mag = true;
         let raf = 0;
@@ -116,8 +119,7 @@ const hasTOC = headings && headings.length > 0;
         const apply = () => {
           cx += (tx - cx) * 0.18;
           cy += (ty - cy) * 0.18;
-          el.style.setProperty('--mx', `${cx.toFixed(2)}px`);
-          el.style.setProperty('--my', `${cy.toFixed(2)}px`);
+          el.style.transform = `translate3d(${cx.toFixed(2)}px, ${cy.toFixed(2)}px, 0)`;
           if (Math.abs(tx - cx) + Math.abs(ty - cy) > 0.05) {
             raf = requestAnimationFrame(apply);
           } else {
@@ -129,6 +131,8 @@ const hasTOC = headings && headings.length > 0;
           const r = el.getBoundingClientRect();
           tx = ((e.clientX - r.left) / r.width  - 0.5) * strength * 2;
           ty = ((e.clientY - r.top)  / r.height - 0.5) * strength * 2;
+          el.style.setProperty('--mx', `${e.clientX - r.left}px`);
+          el.style.setProperty('--my', `${e.clientY - r.top}px`);
           if (!raf) raf = requestAnimationFrame(apply);
         });
         el.addEventListener('mouseleave', () => {
@@ -138,54 +142,49 @@ const hasTOC = headings && headings.length > 0;
       });
     }
 
-    /* ---- Subtle 3D entry on section reveals (desktop only) ---- */
-    function bind3DReveal() {
-      if (window.matchMedia('(max-width: 720px)').matches) return;
+    /* ---- Signal Glitch Reveal on section enters ---- */
+    function bindGlitchReveal() {
       const sections = document.querySelectorAll<HTMLElement>('section.block, .arc__year, .bio__section');
       if (!sections.length) return;
-      sections.forEach((s) => {
-        if ((s as any).__3d) return;
-        (s as any).__3d = true;
-        s.style.transformStyle = 'preserve-3d';
-      });
 
       const io = new IntersectionObserver((entries) => {
         for (const e of entries) {
           const el = e.target as HTMLElement;
           if (e.isIntersecting) {
-            el.style.transition = 'opacity 900ms var(--ease-out), transform 900ms var(--ease-out)';
+            el.style.transition = 'opacity 900ms var(--ease-out), transform 900ms var(--ease-out), filter 900ms var(--ease-out)';
             el.style.opacity = '1';
-            el.style.transform = 'perspective(1400px) rotateX(0deg) translateZ(0)';
+            el.style.transform = 'translateY(0) scale(1)';
+            el.style.filter = 'blur(0) contrast(1)';
+            // Optional: add a quick glitch animation class if defined in global.css
+            el.classList.add('glitch-enter');
             io.unobserve(el);
           }
         }
       }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
 
       sections.forEach((s) => {
-        if (s.classList.contains('--3d-init')) return;
-        s.classList.add('--3d-init');
+        if (s.classList.contains('--glitch-init')) return;
+        s.classList.add('--glitch-init');
         s.style.opacity = '0';
-        s.style.transform = 'perspective(1400px) rotateX(7deg) translateZ(-40px)';
+        s.style.transform = 'translateY(20px) scale(0.98)';
+        s.style.filter = 'blur(10px) contrast(2)';
         io.observe(s);
       });
     }
 
-    /* ---- Generic 3D tilt for [data-tilt] elements ---- */
+    /* ---- Generic 2D tilt/shine for [data-tilt] elements ---- */
     function bindTilt() {
       if (window.matchMedia('(max-width: 720px)').matches) return;
       document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((el) => {
         if ((el as any).__tilt) return;
         (el as any).__tilt = true;
-        const max = Number(el.dataset.tiltMax || '7');
         let raf = 0;
         let tx = 0, ty = 0, cx = 0, cy = 0;
-        el.style.transformStyle = 'preserve-3d';
-        el.style.willChange = 'transform';
         const apply = () => {
-          cx += (tx - cx) * 0.16;
-          cy += (ty - cy) * 0.16;
-          el.style.transform =
-            `perspective(1200px) rotateX(${(cy * max).toFixed(2)}deg) rotateY(${(cx * -max).toFixed(2)}deg) translateZ(0)`;
+          cx += (tx - cx) * 0.12;
+          cy += (ty - cy) * 0.12;
+          // pure 2D subtle shift instead of 3D rotate
+          el.style.transform = `translate(${(cx * -4).toFixed(2)}px, ${(cy * -4).toFixed(2)}px)`;
           if (Math.abs(tx - cx) + Math.abs(ty - cy) > 0.001) {
             raf = requestAnimationFrame(apply);
           } else {
@@ -207,12 +206,12 @@ const hasTOC = headings && headings.length > 0;
       });
     }
 
-    function bootAll() { bindReveal(); bindMagnetic(); bind3DReveal(); bindTilt(); bindRipple(); bindScramble(); }
-    bootAll();
-    document.addEventListener('astro:page-load', bootAll);
-
     /* ---- Click ripple — burst on every pill / row click ---- */
     function bindRipple() {
+      // Prevent multiple global listeners
+      if ((window as any).__rippleBound) return;
+      (window as any).__rippleBound = true;
+
       const SEL = '.pill, .row, .nav__link, .card__cta';
       document.addEventListener('pointerdown', (e) => {
         const t = (e.target as HTMLElement)?.closest?.(SEL) as HTMLElement | null;
@@ -231,6 +230,87 @@ const hasTOC = headings && headings.length > 0;
         t.appendChild(ring);
         ring.addEventListener('animationend', () => ring.remove(), { once: true });
       });
+    }
+
+    /* ---- Scroll Velocity Skew ---- */
+    function bindScrollVelocity() {
+      if (window.matchMedia('(max-width: 720px)').matches) return;
+      const targets = document.querySelectorAll<HTMLElement>('.row, .about-card, .block__head, .cards > *');
+      if (!targets.length) return;
+      
+      // Prevent multiple global listeners
+      if ((window as any).__scrollVelBound) return;
+      (window as any).__scrollVelBound = true;
+      
+      let raf = 0;
+      let lastY = window.scrollY;
+      let smoothedVel = 0;
+
+      const tick = () => {
+        const y = window.scrollY;
+        const vel = y - lastY;
+        lastY = y;
+        
+        smoothedVel += (vel - smoothedVel) * 0.12;
+        
+        // Clamp and apply
+        const skew = Math.max(-3, Math.min(3, smoothedVel * 0.04));
+        
+        // Re-query targets in case of navigation
+        const currentTargets = document.querySelectorAll<HTMLElement>('.row, .about-card, .block__head, .cards > *');
+        currentTargets.forEach(t => {
+          t.style.transform = `skewY(${skew}deg)`;
+        });
+
+        if (Math.abs(smoothedVel) > 0.1 || Math.abs(vel) > 0) {
+          raf = requestAnimationFrame(tick);
+        } else {
+          currentTargets.forEach(t => t.style.transform = 'skewY(0deg)');
+          raf = 0;
+        }
+      };
+      
+      window.addEventListener('scroll', () => {
+        if (!raf) raf = requestAnimationFrame(tick);
+      }, { passive: true });
+    }
+
+    function bootAll() { bindReveal(); bindMagnetic(); bindGlitchReveal(); bindTilt(); bindRipple(); bindScramble(); bindScrollVelocity(); bindAmbientGlow(); }
+    bootAll();
+    document.addEventListener('astro:page-load', bootAll);
+
+    /* ---- Ambient background glow tracking mouse ---- */
+    function bindAmbientGlow() {
+      if (window.matchMedia('(max-width: 720px)').matches) return;
+      const glow = document.querySelector<HTMLElement>('[data-ambient-glow]');
+      if (!glow) return;
+      
+      // Prevent multiple instances
+      if ((glow as any).__bound) return;
+      (glow as any).__bound = true;
+      
+      let raf = 0;
+      let mx = window.innerWidth / 2;
+      let my = window.innerHeight / 2;
+      let cx = mx, cy = my;
+
+      const tick = () => {
+        cx += (mx - cx) * 0.08;
+        cy += (my - cy) * 0.08;
+        glow.style.transform = `translate3d(${cx}px, ${cy}px, 0) translate(-50%, -50%)`;
+        raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+
+      const onMove = (e: MouseEvent) => {
+        mx = e.clientX;
+        my = e.clientY;
+      };
+      window.addEventListener('mousemove', onMove, { passive: true });
+      document.addEventListener('astro:before-swap', () => {
+        cancelAnimationFrame(raf);
+        window.removeEventListener('mousemove', onMove);
+      }, { once: true });
     }
 
     /* ---- Glitch scramble — characters cycle through random glyphs and resolve.
@@ -287,9 +367,21 @@ const hasTOC = headings && headings.length > 0;
 </body>
 </html>
 
-<style>
+  <style>
   body {
     padding-top: var(--nav-h);
+  }
+
+  .ambient-glow {
+    position: fixed;
+    top: 0; left: 0;
+    width: 800px; height: 800px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(190, 210, 255, 0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+    transform: translate(-50%, -50%);
+    will-change: transform;
   }
 
   .shell-grid {

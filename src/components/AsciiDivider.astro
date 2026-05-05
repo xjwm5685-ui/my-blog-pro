@@ -24,22 +24,39 @@ const seed = '·';
 const initial = seed.repeat(density);
 ---
 <div class="ad" data-density={density} data-speed={speed} id={id} aria-hidden="true">
-  <span class="ad__edge ad__edge--l">┤</span>
-  <span class="ad__strip" data-ad-strip>{initial}</span>
-  <span class="ad__edge ad__edge--r">├</span>
+  <div class="ad__track">
+    <span class="ad__edge ad__edge--l">┤</span>
+    <span class="ad__strip" data-ad-strip>{initial}</span>
+    <span class="ad__edge ad__edge--r">├</span>
+  </div>
 </div>
 
 <style>
   .ad {
     position: relative;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
     width: 100%;
     padding: 1.2rem var(--shell-px);
     overflow: hidden;
     border-block: 1px solid var(--border);
     background: linear-gradient(180deg, transparent, rgba(190, 210, 255, 0.02), transparent);
+  }
+  .ad__track {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    transition: transform var(--dur) var(--ease-soft);
+  }
+  .ad:hover .ad__track {
+    transform: scale(1.02);
+  }
+  .ad::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--bg) 0%, transparent 20%, transparent 80%, var(--bg) 100%);
+    pointer-events: none;
+    z-index: 1;
   }
   .ad__edge {
     flex-shrink: 0;
@@ -47,6 +64,7 @@ const initial = seed.repeat(density);
     font-size: 0.72rem;
     color: var(--text-muted);
     letter-spacing: 0.32em;
+    transition: color var(--dur) var(--ease-soft);
   }
   .ad__strip {
     flex: 1;
@@ -58,6 +76,20 @@ const initial = seed.repeat(density);
     color: var(--text-muted);
     text-shadow: 0 0 8px rgba(190, 210, 255, 0.18);
     user-select: none;
+    transition: color var(--dur) var(--ease-soft), text-shadow var(--dur) var(--ease-soft);
+  }
+  .ad:hover .ad__edge,
+  .ad:hover .ad__strip {
+    color: var(--beam-cool);
+  }
+  .ad:hover .ad__strip {
+    color: var(--beam-cool);
+    text-shadow: 0 0 10px rgba(190, 210, 255, 0.4);
+    animation: pulseGlow 2s ease-in-out infinite alternate;
+  }
+  @keyframes pulseGlow {
+    0% { text-shadow: 0 0 10px rgba(190, 210, 255, 0.4); }
+    100% { text-shadow: 0 0 20px rgba(190, 210, 255, 0.8), 0 0 5px #fff; }
   }
   @media (max-width: 720px) {
     .ad { padding-block: 0.8rem; }
@@ -75,28 +107,68 @@ const initial = seed.repeat(density);
       const strip = root.querySelector<HTMLElement>('[data-ad-strip]');
       if (!strip) return;
       const density = Number(root.dataset.density || 60);
-      const speed   = Number(root.dataset.speed   || 90);
+      const baseSpeed = Number(root.dataset.speed || 90);
       let chars: string[] = new Array(density).fill('·');
 
-      const fill = () => {
-        // mutate ~12% of chars per tick
-        const n = Math.max(1, Math.floor(density * 0.12));
-        for (let i = 0; i < n; i++) {
-          const idx = Math.floor(Math.random() * density);
-          chars[idx] = GLYPHS.charAt(Math.floor(Math.random() * GLYPHS.length));
+      let lastTime = performance.now();
+      let accumulator = 0;
+      let rafId: number;
+      let visible = false;
+      let lastScrollY = window.scrollY;
+
+      const tick = (time: number) => {
+        if (!visible) return;
+        
+        const delta = time - lastTime;
+        lastTime = time;
+        
+        // Calculate scroll velocity
+        const currentScrollY = window.scrollY;
+        const scrollDelta = Math.abs(currentScrollY - lastScrollY);
+        lastScrollY = currentScrollY;
+        
+        // Dynamic speed based on scroll (faster scroll = smaller interval)
+        const scrollBoost = Math.min(scrollDelta * 2, 80);
+        const currentSpeed = Math.max(16, baseSpeed - scrollBoost);
+        
+        accumulator += delta;
+        
+        if (accumulator > currentSpeed) {
+          accumulator = 0;
+          // mutate chars
+          // more mutation if scrolling fast
+          const mutationRatio = 0.12 + (scrollBoost / 80) * 0.4;
+          const n = Math.max(1, Math.floor(density * mutationRatio));
+          for (let i = 0; i < n; i++) {
+            const idx = Math.floor(Math.random() * density);
+            chars[idx] = GLYPHS.charAt(Math.floor(Math.random() * GLYPHS.length));
+          }
+          strip.textContent = chars.join('');
         }
-        strip.textContent = chars.join('');
+        
+        rafId = requestAnimationFrame(tick);
       };
 
-      let id: number | undefined;
-      let visible = true;
-      const start = () => { if (id == null) id = window.setInterval(fill, speed); };
-      const stop  = () => { if (id != null) { window.clearInterval(id); id = undefined; } };
+      const start = () => {
+        if (visible) return;
+        visible = true;
+        lastTime = performance.now();
+        lastScrollY = window.scrollY;
+        rafId = requestAnimationFrame(tick);
+      };
+      
+      const stop  = () => {
+        visible = false;
+        if (rafId) cancelAnimationFrame(rafId);
+      };
 
       const io = new IntersectionObserver((entries) => {
         for (const e of entries) {
-          visible = e.isIntersecting;
-          visible ? start() : stop();
+          if (e.isIntersecting) {
+            start();
+          } else {
+            stop();
+          }
         }
       }, { threshold: 0.05 });
       io.observe(root);

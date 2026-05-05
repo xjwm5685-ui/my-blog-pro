@@ -2,7 +2,8 @@
    WYHEF · cosmic-tech editorial · x.ai-inspired refined minimalism
    ------------------------------------------------------------------------- */
 
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@200;300;400;500;600&family=Geist+Mono:wght@300;400;500&display=swap');
+@import url('https://fonts.loli.net/css2?family=Geist:wght@200;300;400;500;600&family=Geist+Mono:wght@300;400;500&display=swap');
+@import url('https://fonts.loli.net/css2?family=Syncopate:wght@400;700&display=swap');
 @import url('https://cdn.jsdelivr.net/npm/misans@4.0.0/lib/Normal/MiSans-Light.min.css');
 @import url('https://cdn.jsdelivr.net/npm/misans@4.0.0/lib/Normal/MiSans-Regular.min.css');
 
@@ -52,6 +53,7 @@
   --r-pill: 999px;
 
   /* Type families */
+  --font-brand:   'Syncopate', sans-serif;
   --font-display: 'Geist', 'MiSans', 'PingFang SC', 'Noto Sans SC', sans-serif;
   --font-body:    'Geist', 'MiSans', 'PingFang SC', 'Noto Sans SC', sans-serif;
   --font-mono:    'Geist Mono', 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
@@ -187,8 +189,8 @@ img { max-width: 100%; height: auto; display: block; }
 
 /* Pill button — the universal CTA */
 .pill {
-  --mx: 0px;
-  --my: 0px;
+  --mx: 50%;
+  --my: 50%;
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -205,7 +207,7 @@ img { max-width: 100%; height: auto; display: block; }
   cursor: pointer;
   overflow: hidden;
   isolation: isolate;
-  transform: translate3d(var(--mx), var(--my), 0);
+  transform: translate3d(0, 0, 0);
   transition:
     border-color var(--dur) var(--ease-soft),
     background-color var(--dur) var(--ease-soft),
@@ -216,12 +218,26 @@ img { max-width: 100%; height: auto; display: block; }
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(120px circle at 50% 120%,
+  background: radial-gradient(120px circle at var(--mx) var(--my),
     rgba(190, 210, 255, 0.32),
     transparent 60%);
   opacity: 0;
   transition: opacity var(--dur) var(--ease-soft);
   z-index: -1;
+}
+.pill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(60px circle at var(--mx) var(--my), rgba(255, 255, 255, 0.9), transparent 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease-soft);
+  pointer-events: none;
 }
 .pill:hover {
   border-color: var(--border-bright);
@@ -229,9 +245,11 @@ img { max-width: 100%; height: auto; display: block; }
   color: var(--text);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 12px 40px -10px rgba(190, 210, 255, 0.32);
+    0 12px 40px -10px rgba(190, 210, 255, 0.32),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  transform: scale(1.05);
 }
-.pill:hover::before { opacity: 1; }
+.pill:hover::before, .pill:hover::after { opacity: 1; }
 .pill .arrow {
   display: inline-block;
   transition: transform var(--dur) var(--ease-soft);
@@ -245,6 +263,8 @@ img { max-width: 100%; height: auto; display: block; }
 .pill--ghost:hover {
   border-color: var(--border-strong);
   color: var(--text);
+  transform: translateZ(40px) scale(1.05) !important;
+  box-shadow: 0 10px 30px -10px rgba(190, 210, 255, 0.2);
 }
 
 /* Shell container — full-width with breathing edge padding */
@@ -310,6 +330,13 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 /* -------------------------------------------------------------------------
+   Magnetic Hover Effect for Pills & Custom Interactions
+   ------------------------------------------------------------------------- */
+.pill:active {
+  transform: scale(0.95);
+}
+
+/* -------------------------------------------------------------------------
    Paragraph reveal — used in articles and bio sections
    ------------------------------------------------------------------------- */
 [data-paragraph-reveal] > * {
@@ -334,9 +361,10 @@ img { max-width: 100%; height: auto; display: block; }
   border-radius: 50%;
   background:
     radial-gradient(circle,
-      rgba(255, 255, 255, 0.65) 0%,
-      rgba(190, 210, 255, 0.35) 40%,
+      rgba(255, 255, 255, 0.8) 0%,
+      rgba(190, 210, 255, 0.4) 40%,
       transparent 70%);
+  box-shadow: 0 0 20px rgba(190, 210, 255, 0.6);
   transform: translate(-50%, -50%) scale(1);
   pointer-events: none;
   animation: rippleOut 720ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -344,9 +372,9 @@ img { max-width: 100%; height: auto; display: block; }
   mix-blend-mode: screen;
 }
 @keyframes rippleOut {
-  0%   { transform: translate(-50%, -50%) scale(1);   opacity: 0.9; }
-  60%  { opacity: 0.5; }
-  100% { transform: translate(-50%, -50%) scale(60);  opacity: 0; }
+  0%   { transform: translate(-50%, -50%) scale(1);   opacity: 1; filter: brightness(2); }
+  60%  { opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(80);  opacity: 0; filter: brightness(1); }
 }
 
 /* -------------------------------------------------------------------------
@@ -384,12 +412,53 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 /* -------------------------------------------------------------------------
-   Astro view-transition tuning
+   Glitch Enter (Signal Reveal)
    ------------------------------------------------------------------------- */
-::view-transition-old(root),
+.glitch-enter {
+  animation: glitchEnterAnim 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes glitchEnterAnim {
+  0% {
+    clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+    filter: blur(10px) contrast(2) drop-shadow(-10px 0 0 rgba(255, 0, 0, 0.4)) drop-shadow(10px 0 0 rgba(0, 255, 255, 0.4));
+  }
+  30% {
+    clip-path: polygon(0 0, 100% 0, 100% 40%, 0 40%);
+    filter: blur(4px) contrast(1.5) drop-shadow(-5px 0 0 rgba(255, 0, 0, 0.4)) drop-shadow(5px 0 0 rgba(0, 255, 255, 0.4));
+  }
+  60% {
+    clip-path: polygon(0 0, 100% 0, 100% 80%, 0 80%);
+    filter: blur(2px) contrast(1.1) drop-shadow(-2px 0 0 rgba(255, 0, 0, 0.2)) drop-shadow(2px 0 0 rgba(0, 255, 255, 0.2));
+  }
+  100% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    filter: blur(0) contrast(1);
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Astro view-transition tuning (Ultra-satisfying cinematic glitch/slice)
+   ------------------------------------------------------------------------- */
+::view-transition-old(root) {
+  animation: 
+    400ms cubic-bezier(0.8, 0, 0.2, 1) both sliceOut;
+}
 ::view-transition-new(root) {
-  animation-duration: 320ms;
-  animation-timing-function: var(--ease-out);
+  animation: 
+    600ms cubic-bezier(0.22, 1, 0.36, 1) both sliceIn;
+}
+
+@keyframes sliceOut {
+  0% { transform: scale(1) translateY(0); filter: blur(0) brightness(1); opacity: 1; }
+  50% { transform: scale(0.98) translateY(-2vh); filter: blur(4px) brightness(1.5); opacity: 0.5; }
+  100% { transform: scale(0.95) translateY(-5vh); filter: blur(12px) brightness(0.2); opacity: 0; }
+}
+
+@keyframes sliceIn {
+  0% { transform: scale(1.05) translateY(5vh); filter: blur(12px) brightness(2); opacity: 0; }
+  60% { transform: scale(1.01) translateY(1vh); filter: blur(4px) brightness(1.2); opacity: 0.8; }
+  100% { transform: scale(1) translateY(0); filter: blur(0) brightness(1); opacity: 1; }
 }
 
 /* -------------------------------------------------------------------------
@@ -432,14 +501,51 @@ img { max-width: 100%; height: auto; display: block; }
   color: var(--text);
 }
 
+.prose h2, .prose h3, .prose h4 {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+.prose h2:hover::before, .prose h3:hover::before, .prose h4:hover::before {
+  content: '#';
+  position: absolute;
+  left: -1.2em;
+  color: var(--beam-mist);
+  animation: fadeHash 0.2s ease-out both;
+}
+
+@keyframes fadeHash {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 .prose a {
+  position: relative;
   color: var(--text);
   border-bottom: 1px solid var(--border-strong);
   transition: border-color var(--dur-fast) var(--ease-soft), color var(--dur-fast) var(--ease-soft);
+  text-decoration: none;
+}
+.prose a::before {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--beam-cool);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--dur) var(--ease-out);
 }
 .prose a:hover {
-  border-bottom-color: var(--beam-cool);
+  border-bottom-color: transparent;
   color: #fff;
+  text-shadow: 0 0 10px rgba(190, 210, 255, 0.4);
+}
+.prose a:hover::before {
+  transform: scaleX(1);
+  transform-origin: left;
 }
 
 .prose strong { color: var(--text); font-weight: 500; }
@@ -449,16 +555,26 @@ img { max-width: 100%; height: auto; display: block; }
   margin: 0 0 1.4em 1.5rem;
   color: var(--text-soft);
 }
-.prose li { margin-bottom: 0.5em; }
-.prose ul li::marker { color: var(--text-muted); }
+.prose li { margin-bottom: 0.5em; transition: transform 0.2s var(--ease-out); }
+.prose li:hover { transform: translateX(2px); color: var(--text); }
+.prose ul li::marker { color: var(--beam-mist); transition: color 0.2s var(--ease-out); }
+.prose ul li:hover::marker { color: var(--beam-cool); }
 
 .prose blockquote {
+  position: relative;
   margin: 1.6em 0;
-  padding: 0.4em 0 0.4em 1.25rem;
-  border-left: 1px solid var(--border-strong);
+  padding: 0.8em 1.25rem;
+  border-left: 2px solid var(--border-strong);
   color: var(--text-dim);
   font-style: normal;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.015), transparent 60%);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), transparent 80%);
+  transition: background var(--dur) var(--ease-soft), border-left-color var(--dur) var(--ease-soft), transform var(--dur) var(--ease-soft);
+}
+
+.prose blockquote:hover {
+  background: linear-gradient(90deg, rgba(190, 210, 255, 0.06), transparent 80%);
+  border-left-color: var(--beam-cool);
+  transform: translateX(4px);
 }
 
 .prose code {
@@ -469,6 +585,11 @@ img { max-width: 100%; height: auto; display: block; }
   border: 1px solid var(--border);
   border-radius: var(--r-1);
   color: var(--text);
+  transition: background var(--dur-fast) var(--ease-soft), border-color var(--dur-fast) var(--ease-soft);
+}
+.prose code:hover {
+  background: rgba(190, 210, 255, 0.15);
+  border-color: rgba(190, 210, 255, 0.3);
 }
 
 .prose pre {
@@ -480,6 +601,12 @@ img { max-width: 100%; height: auto; display: block; }
   overflow-x: auto;
   font-size: 0.85rem;
   line-height: 1.65;
+  transition: box-shadow var(--dur) var(--ease-soft), border-color var(--dur) var(--ease-soft);
+}
+
+.prose pre:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 8px 30px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 }
 
 .prose pre code {
@@ -500,6 +627,14 @@ img { max-width: 100%; height: auto; display: block; }
   border-radius: var(--r-2);
   border: 1px solid var(--border);
   margin: 1.75em 0;
+  transition: transform var(--dur) var(--ease-soft), box-shadow var(--dur) var(--ease-soft), border-color var(--dur) var(--ease-soft);
+  cursor: pointer;
+}
+
+.prose img:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.8), 0 10px 20px -10px rgba(190, 210, 255, 0.2);
+  border-color: var(--border-strong);
 }
 
 .prose table {

@@ -100,9 +100,13 @@ const train = [...items, ...items];
     color: var(--text-soft);
     letter-spacing: -0.015em;
     white-space: nowrap;
-    transition: color var(--dur) var(--ease-soft);
+    transition: transform var(--dur) var(--ease-soft), filter var(--dur) var(--ease-soft);
+    cursor: default;
   }
-  .mq__item:hover { color: var(--text); }
+  .mq__item:hover { 
+    transform: scale(1.05) skewX(-5deg);
+    filter: drop-shadow(0 0 10px rgba(190, 210, 255, 0.6));
+  }
 
   .mq__glyph {
     display: inline-block;

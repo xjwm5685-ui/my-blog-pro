@@ -119,6 +119,9 @@
     const text = document.querySelector<HTMLElement>('[data-spot-hint-text]');
     if (!root || !mask || !hint || !text) return;
 
+    if ((root as any).__bound) return;
+    (root as any).__bound = true;
+
     let armed = false;
     let x = window.innerWidth / 2;
     let y = window.innerHeight / 2;
@@ -153,17 +156,19 @@
       }
     };
 
-    document.addEventListener('keydown', (e) => {
+    const onKeyDown = (e: KeyboardEvent) => {
       if (e.repeat) return;
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
       if (e.key === 'f' || e.key === 'F') { e.preventDefault(); setArmed(!armed); }
       if (e.key === 'Escape' && armed)    { e.preventDefault(); setArmed(false); }
-    });
+    };
+    document.addEventListener('keydown', onKeyDown);
 
     document.addEventListener('astro:before-swap', () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('mousemove', onMove);
+      document.removeEventListener('keydown', onKeyDown);
     }, { once: true });
   }
   bootSpot();

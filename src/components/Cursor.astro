@@ -5,7 +5,9 @@
  */
 ---
 <div class="cur" aria-hidden="true">
-  <span class="cur__ring" data-cur-ring></span>
+  <span class="cur__ring" data-cur-ring>
+    <span class="cur__label" data-cur-label></span>
+  </span>
   <span class="cur__dot"  data-cur-dot></span>
   {Array.from({ length: 8 }).map((_, i) => (
     <span class="cur__trail" data-cur-trail style={`--ti: ${i};`}></span>
@@ -59,8 +61,23 @@
       height 240ms var(--ease-soft),
       border-color 200ms var(--ease-soft),
       background-color 200ms var(--ease-soft),
+      border-radius 200ms var(--ease-soft),
       opacity 200ms var(--ease-soft);
     backdrop-filter: invert(0.05) blur(0.5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cur__label {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: #fff;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 200ms var(--ease-soft), transform 200ms var(--ease-soft);
+    white-space: nowrap;
+    pointer-events: none;
   }
   .cur__dot {
     width: 4px; height: 4px;
@@ -87,6 +104,19 @@
     background: rgba(255, 255, 255, 0.85);
   }
   .cur.is-text .cur__dot { opacity: 0; }
+  
+  .cur.is-row .cur__ring, .cur.is-card .cur__ring {
+    width: 76px; height: 76px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(2px);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  .cur.is-row .cur__dot, .cur.is-card .cur__dot { opacity: 0; }
+  .cur.is-row .cur__label, .cur.is-card .cur__label {
+    opacity: 1;
+    transform: scale(1);
+  }
+
   .cur.is-hidden { opacity: 0; }
 </style>
 
@@ -142,9 +172,34 @@
     const onOver = (e: Event) => {
       const t = e.target as HTMLElement;
       if (!(t instanceof HTMLElement)) return;
-      if (t.closest(TEXT_SEL))      { root.classList.add('is-text');  root.classList.remove('is-hover'); return; }
-      if (t.closest(HOVER_SEL))     { root.classList.add('is-hover'); root.classList.remove('is-text');  return; }
-      root.classList.remove('is-hover'); root.classList.remove('is-text');
+      
+      const label = document.querySelector('[data-cur-label]') as HTMLElement;
+
+      if (t.closest(TEXT_SEL)) { 
+        root.className = 'cur is-text'; 
+        return; 
+      }
+      
+      const row = t.closest('.row');
+      if (row) {
+        root.className = 'cur is-row';
+        if (label) label.textContent = 'READ';
+        return;
+      }
+
+      const card = t.closest('.card');
+      if (card) {
+        root.className = 'cur is-card';
+        if (label) label.textContent = 'VIEW';
+        return;
+      }
+
+      if (t.closest(HOVER_SEL)) { 
+        root.className = 'cur is-hover'; 
+        return; 
+      }
+      
+      root.className = 'cur';
     };
 
     window.addEventListener('mousemove', onMove, { passive: true });
